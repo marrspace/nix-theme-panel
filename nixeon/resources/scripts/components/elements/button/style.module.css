@@ -1,0 +1,119 @@
+/* Button — a physical key.
+   Three cues make it feel real: a raised face (stacked shadows), a chamfer (bright
+   top lip + dark bottom lip) and travel on press. A variant only changes the
+   plating; it never changes the physics. */
+
+.button {
+    @apply px-4 py-2 inline-flex items-center justify-center;
+    @apply text-sm font-bold;
+    min-height: var(--nx-tap);
+    border-radius: var(--nx-radius);
+    border: 0;
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-control), var(--nx-control-2));
+    box-shadow: var(--nx-key), var(--nx-raise-sm), inset 0 0 0 1px var(--nx-control-edge);
+    transition: box-shadow var(--nx-t-fast) var(--nx-ease-press),
+        transform var(--nx-t-fast) var(--nx-ease-press), background var(--nx-t-fast) linear;
+    letter-spacing: 0.008em;
+}
+
+.button:active:not(:disabled) {
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.12);
+    transform: translateY(1px);
+}
+
+.button:disabled {
+    @apply cursor-not-allowed;
+    box-shadow: var(--nx-sink-sm);
+    opacity: 0.6;
+}
+
+/* Sizing Controls */
+.button.small {
+    @apply px-3 text-xs;
+    min-height: 34px;
+    border-radius: var(--nx-radius-sm);
+}
+
+.button.large {
+    @apply px-6;
+    min-height: 50px;
+}
+
+.button.square {
+    @apply p-0;
+    width: var(--nx-tap);
+    height: var(--nx-tap);
+}
+
+.button.square.small {
+    width: 34px;
+    height: 34px;
+}
+
+/* ------------------------------------------------------------------ primary */
+/* accent = a plated cap: saturated face, bright chamfer, deep under-edge */
+.primary {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 var(--nx-plate-accent-deep),
+        1px 2px 3px var(--nx-contact), 3px 4px 10px var(--nx-accent-shade),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.primary:active:not(:disabled) {
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.primary:disabled {
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.25);
+    opacity: 0.55;
+}
+
+/* secondary = the same key, unplated. Declared after .primary so it wins the
+   background/shadow cascade when both classes are present. It uses the CONTROL
+   material, not --nx-raised: on a card, --nx-raised is the card's own face, so a
+   control painted with it had no edge at all in dark mode. */
+.secondary {
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-control), var(--nx-control-2));
+    box-shadow: var(--nx-key), var(--nx-raise-sm), inset 0 0 0 1px var(--nx-control-edge);
+}
+
+.secondary:disabled {
+    background: linear-gradient(180deg, var(--nx-control), var(--nx-control-2));
+    box-shadow: var(--nx-sink-sm);
+}
+
+/* --------------------------------------------------------------------- text */
+/* A text button is still a key — just an unplated one. It must NOT use the card's
+   material or it disappears on the card it sits on. */
+.text {
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-control), var(--nx-control-2));
+    box-shadow: var(--nx-key), var(--nx-raise-sm), inset 0 0 0 1px var(--nx-control-edge);
+}
+
+/* .text buttons also carry .primary (Button.tsx always adds it), so without this
+   rule a disabled text button kept .primary:disabled's blue plate under a dark ink
+   label — measured 3.19:1. Keep the control material instead. */
+.text:disabled {
+    background: linear-gradient(180deg, var(--nx-control), var(--nx-control-2));
+    box-shadow: var(--nx-sink-sm);
+}
+
+/* -------------------------------------------------------------------- danger */
+.danger {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-danger), var(--nx-plate-danger-deep));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 1px 0 var(--nx-plate-danger-deep),
+        1px 2px 3px var(--nx-contact), 3px 4px 10px color-mix(in srgb, var(--nx-plate-danger) 30%, transparent),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.28);
+}
+
+.danger:active:not(:disabled) {
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.32), inset -3px -3px 8px rgba(255, 255, 255, 0.14);
+    transform: translateY(1px);
+}

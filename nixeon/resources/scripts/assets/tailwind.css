@@ -1,0 +1,13 @@
+/* Nixeon 408 — Tailwind entry.
+   postcss-import requires @import to precede every other statement, so both
+   files load first. Ordering is still correct because the imported rules live
+   inside explicit @layer blocks: tokens are plain custom properties (layer-free,
+   always emitted), and the component primitives declare themselves as
+   `@layer components`, which Tailwind places after base and before utilities —
+   so a utility class can still override a primitive when a component needs it. */
+@import './css/tokens.css';
+@import './css/components.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

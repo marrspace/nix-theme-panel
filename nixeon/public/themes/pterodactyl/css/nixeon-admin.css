@@ -1,0 +1,1242 @@
+/* ============================================================================
+   NIXEON 408 — ADMIN SURFACE
+   ----------------------------------------------------------------------------
+   The Blade admin area (AdminLTE) re-skinned onto the same material system as
+   the React panel. Loaded LAST, after pterodactyl.css, so it wins without
+   !important except where the shipped sheet already declares it.
+
+   Three deliberate choices, each defensible rather than averaged:
+
+   1. TYPE — Roboto, on the Material 3 type scale. The admin is a control
+      surface: dense, numeric, scanned not read. Roboto is Android's own face
+      and carries the scale natively (its metrics ARE the Material metrics), so
+      the roles below are quoted from the spec, not invented. Display faces are
+      not used here on purpose — a display serif fights a data table.
+
+   2. PHYSICS — every surface is built from the SAME --nx-* physics tokens as
+      the panel (raise / sink / bevel / contact). One light source, upper-left.
+      A control panel is a rack of physical instruments; it must not switch
+      material language halfway through the app.
+
+   3. THEME — light and dark both come from nixeon-tokens.css (:root + html.dark),
+      so this sheet references var(--nx-*) and themes for free. No second palette.
+
+   Layout is NOT touched: only surface, type, colour and interaction states.
+   AdminLTE's grid, sidebar mechanics and JS hooks are left intact.
+   ========================================================================= */
+
+/* --------------------------------------------------------------------- fonts
+   Roboto ships as ONE variable file per style (wght 100–900), so a single
+   @font-face covers every weight the scale asks for — no 300/400/500/700 file
+   quartet, no FOUT between weights. font-display:swap keeps first paint instant.
+   ------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/themes/pterodactyl/fonts/roboto-normal.woff2') format('woff2-variations'),
+         url('/themes/pterodactyl/fonts/roboto-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/themes/pterodactyl/fonts/roboto-italic.woff2') format('woff2-variations'),
+         url('/themes/pterodactyl/fonts/roboto-italic.woff2') format('woff2');
+}
+
+/* ------------------------------------------------------------------ type scale
+   Material 3 roles, verbatim. `--nx-type-*` are full font shorthands so a rule
+   reads `font: var(--nx-type-title)` and can never drift from the spec.
+   ------------------------------------------------------------------------- */
+:root {
+    --nxx-sans: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --nxx-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --nx-type-headline: 400 24px/32px var(--nxx-sans);
+    --nx-type-title-lg: 400 22px/28px var(--nxx-sans);
+    --nx-type-title: 500 16px/24px var(--nxx-sans);
+    --nx-type-title-sm: 500 14px/20px var(--nxx-sans);
+    --nx-type-body-lg: 400 16px/24px var(--nxx-sans);
+    --nx-type-body: 400 14px/20px var(--nxx-sans);
+    --nx-type-body-sm: 400 12px/16px var(--nxx-sans);
+    --nx-type-label: 500 14px/20px var(--nxx-sans);
+    --nx-type-label-sm: 500 12px/16px var(--nxx-sans);
+
+    /* tracking is part of the Material spec — it is what makes Roboto read as
+       Android rather than as a generic sans */
+    --nx-track-body: 0.25px;
+    --nx-track-label: 0.5px;
+    --nx-track-title: 0.15px;
+}
+
+/* ---------------------------------------------------------------------- base */
+html {
+    /* the fixed AdminLTE chrome is measured in px against this */
+    font-size: 16px;
+}
+
+body {
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    color: var(--nx-ink);
+    background-color: var(--nx-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* AdminLTE stamps "Helvetica Neue" on dozens of selectors; one broad rule with a
+   scoped reset beats chasing each. Code/pre are re-declared below. */
+body,
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+button, input, select, textarea, .form-control,
+.box, .box-header, .box-title, .box-body, .box-footer,
+.main-header, .main-sidebar, .main-footer, .content-wrapper,
+.breadcrumb, .nav, .label, .btn, .alert, .callout, .modal,
+.select2-container, .table {
+    font-family: var(--nxx-sans);
+}
+
+h1, .h1 { font: var(--nx-type-headline); letter-spacing: 0; color: var(--nx-ink); }
+h2, .h2 { font: var(--nx-type-title-lg); letter-spacing: 0; color: var(--nx-ink); }
+h3, .h3 { font: var(--nx-type-title); letter-spacing: var(--nx-track-title); color: var(--nx-ink); }
+h4, .h4 { font: var(--nx-type-title-sm); letter-spacing: var(--nx-track-title); color: var(--nx-ink); }
+h5, .h5 { font: var(--nx-type-label); letter-spacing: var(--nx-track-label); color: var(--nx-ink); }
+h6, .h6 { font: var(--nx-type-label-sm); letter-spacing: var(--nx-track-label); color: var(--nx-ink-2); }
+
+p { margin: 0 0 0.75rem; }
+
+small, .small { font: var(--nx-type-body-sm); letter-spacing: 0.4px; }
+
+a { color: var(--nx-accent-ink); text-decoration: none; }
+a:hover, a:focus { color: var(--nx-accent); text-decoration: underline; }
+
+hr { border-top: 1px solid var(--nx-edge); }
+
+::selection { background: var(--nx-accent-soft); color: var(--nx-ink); }
+
+/* Pterodactyl ships these as !important, so they are matched in kind. The
+   colours come from the semantic INK tokens, which are tuned per theme for
+   text contrast (the plate tokens carry white text instead). */
+.text-muted { color: var(--nx-ink-2) !important; }
+.text-gray { color: var(--nx-ink-2) !important; }
+.text-danger { color: var(--nx-danger-ink) !important; }
+.text-success, .text-green { color: var(--nx-success-ink) !important; }
+.text-warning { color: var(--nx-warning-ink) !important; }
+.text-info { color: var(--nx-info) !important; }
+.text-primary { color: var(--nx-accent-ink) !important; }
+.strong { font-weight: 700 !important; }
+
+/* ------------------------------------------------------------------ chrome
+   Header / sidebar / footer are the instrument housing: raised faces over the
+   page field. The old #1f2933 / #181f27 dark chrome is replaced so the admin
+   matches the panel in BOTH themes rather than being permanently dark.
+
+   SPECIFICITY NOTE: the shipped sheets prefix these selectors with `.skin-blue`
+   (and `body` carries that class), which outranks a bare `.main-header .navbar`.
+   Every chrome rule below is therefore scoped under `body.skin-blue` so it wins
+   on source order instead of needing !important.
+   ------------------------------------------------------------------------- */
+body.skin-blue .main-header .logo,
+body.skin-blue .main-header .navbar,
+body.skin-blue .main-sidebar,
+body.skin-blue .left-side,
+body.skin-blue .main-footer {
+    background-color: var(--nx-raised);
+    background-image: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    color: var(--nx-ink);
+}
+
+body.skin-blue .main-header .logo {
+    border-bottom: 1px solid var(--nx-edge);
+    font: var(--nx-type-title);
+    letter-spacing: var(--nx-track-title);
+    color: var(--nx-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.skin-blue .main-header .logo:hover,
+body.skin-blue .main-header .logo:focus {
+    background-color: var(--nx-raised);
+    background-image: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    color: var(--nx-ink);
+}
+
+body.skin-blue .main-header .navbar { border-bottom: 1px solid var(--nx-edge); }
+
+body.skin-blue .main-header .navbar .nav > li > a,
+body.skin-blue .main-header .navbar .sidebar-toggle {
+    color: var(--nx-ink-2);
+    transition: color var(--nx-t-fast) linear, background var(--nx-t-fast) linear;
+}
+
+body.skin-blue .main-header .navbar .nav > li > a:hover,
+body.skin-blue .main-header .navbar .nav > li > a:focus,
+body.skin-blue .main-header .navbar .nav > li > a:active,
+body.skin-blue .main-header .navbar .nav .open > a,
+body.skin-blue .main-header .navbar .nav > .active > a,
+body.skin-blue .main-header .navbar .sidebar-toggle:hover {
+    background-color: var(--nx-base);
+    background-image: none;
+    color: var(--nx-ink);
+}
+
+body.skin-blue .main-sidebar { border-right: 1px solid var(--nx-edge); }
+
+/* pterodactyl.css bolts a generic drop shadow onto the chrome; the material
+   system describes lift with the raise tokens instead, so the strays go. */
+body.skin-blue .wrapper,
+body.skin-blue .main-sidebar,
+body.skin-blue .left-side { box-shadow: none; }
+
+.fixed .main-header {
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-sm);
+}
+
+/* the theme toggle sits with the other header actions; it is an icon-only
+   control, so it gets the same hit target and hover treatment as its neighbours */
+.nx-theme-toggle-item > a { cursor: pointer; }
+.nx-theme-toggle-item > a > .fa { font-size: 15px; }
+
+/* section headers in the sidebar are stamped labels, not body copy */
+body.skin-blue .sidebar-menu > li.header {
+    font: var(--nx-type-label-sm);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nx-ink-3);
+    background: transparent;
+}
+
+body.skin-blue .sidebar-menu > li > a,
+body.skin-blue .sidebar a {
+    color: var(--nx-ink-2);
+    border-left: 3px solid transparent;
+    transition: color var(--nx-t-fast) linear, background var(--nx-t-fast) linear,
+                border-color var(--nx-t-fast) linear;
+}
+
+body.skin-blue .sidebar-menu > li > a:hover,
+body.skin-blue .sidebar-menu > li > a:focus,
+body.skin-blue .sidebar-menu > li:hover > a,
+body.skin-blue .sidebar-menu > li.menu-open > a,
+body.skin-blue .sidebar a:hover {
+    background-color: var(--nx-base);
+    color: var(--nx-ink);
+    text-decoration: none;
+}
+
+body.skin-blue .sidebar-menu > li.active > a,
+body.skin-blue .sidebar-menu > li.active:hover > a {
+    /* the active row is a lit key: accent rail + tinted wash + ink at full strength */
+    color: var(--nx-accent-ink);
+    background-color: var(--nx-accent-soft);
+    border-left-color: var(--nx-accent);
+    font-weight: 500;
+}
+
+/* treeview submenus keep the same surface, one step quieter */
+body.skin-blue .sidebar-menu > li > .treeview-menu { background: var(--nx-base); }
+body.skin-blue .sidebar-menu .treeview-menu > li > a { color: var(--nx-ink-2); }
+body.skin-blue .sidebar-menu .treeview-menu > li.active > a,
+body.skin-blue .sidebar-menu .treeview-menu > li > a:hover { color: var(--nx-ink); }
+
+.sidebar-menu > li > a > .fa,
+.sidebar-menu > li > a > .glyphicon,
+.sidebar-menu > li > a > .ion {
+    width: 1.5em;
+    text-align: center;
+    opacity: 0.9;
+}
+
+body.skin-blue .main-footer {
+    border-top: 1px solid var(--nx-edge);
+    font: var(--nx-type-body-sm);
+    letter-spacing: 0.4px;
+    color: var(--nx-ink-2);
+}
+
+body.skin-blue .main-footer a { color: var(--nx-accent-ink); }
+
+.content-wrapper { background-color: var(--nx-base); }
+
+.content-header > h1 {
+    font: var(--nx-type-headline);
+    letter-spacing: 0;
+    color: var(--nx-ink);
+}
+
+.content-header > h1 > small {
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    color: var(--nx-ink-2);
+}
+
+/* breadcrumb: quiet, mono-ish path — it is navigation metadata, not content.
+   AdminLTE scopes its own rules as `.content-header>.breadcrumb>li>a` (0,3,0),
+   so these are matched at the same depth. */
+.breadcrumb,
+.content-header > .breadcrumb {
+    background: transparent;
+    font: var(--nx-type-body-sm);
+    letter-spacing: 0.4px;
+    color: var(--nx-ink-2);
+}
+
+.content-header > .breadcrumb > li > a { color: var(--nx-ink-2); }
+.content-header > .breadcrumb > li > a:hover { color: var(--nx-accent-ink); }
+.content-header > .breadcrumb > .active { color: var(--nx-ink); }
+.content-header > .breadcrumb > li + li:before { color: var(--nx-ink-3); }
+
+/* ------------------------------------------------------------------- boxes
+   `.box` is the admin's card. Built as a raised face with a 1px occlusion line
+   so it reads as TOUCHING the page rather than hovering, and a 2px semantic
+   top edge that encodes box type (primary/success/danger/warning) — that top
+   edge is functional colour-coding, not decoration.
+   ------------------------------------------------------------------------- */
+.box {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border: 0;
+    border-top: 2px solid var(--nx-edge);
+    border-radius: var(--nx-radius-lg);
+    color: var(--nx-ink);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top),
+                inset 0 0 0 1px var(--nx-edge) !important;
+    overflow: hidden;
+}
+
+.box.box-primary { border-top-color: var(--nx-accent); }
+.box.box-success { border-top-color: var(--nx-success); }
+.box.box-danger { border-top-color: var(--nx-danger); }
+.box.box-warning { border-top-color: var(--nx-warning); }
+.box.box-default { border-top-color: var(--nx-edge); }
+
+.box-header {
+    background: transparent;
+    color: var(--nx-ink);
+    border-bottom: 1px solid var(--nx-edge);
+    padding: 0.85rem 1rem;
+}
+
+.box-header.with-border { border-bottom: 1px solid var(--nx-edge); }
+
+/* AdminLTE sets `.box-header .box-title` (0,2,0) to 18px/line-height:1, so the
+   re-skin must match that specificity to win on source order. */
+.box-header .box-title,
+.box-header > .box-title {
+    font: var(--nx-type-title);
+    letter-spacing: var(--nx-track-title);
+    line-height: 24px;
+    color: var(--nx-ink);
+    display: inline-block;
+    margin: 0;
+}
+
+.box-header > .box-tools .btn { box-shadow: none; }
+.box-header > .box-tools .btn:hover { box-shadow: none; }
+
+.box-body { color: var(--nx-ink); }
+
+.box-footer {
+    background: transparent;
+    border-top: 1px solid var(--nx-edge);
+    color: var(--nx-ink-2);
+}
+
+.box-comments, .box-comment { border-color: var(--nx-edge); }
+
+/* -------------------------------------------------------------------- forms
+   Every input is a WELL: recessed, top lip shadowed, bottom catching light.
+   That is the exact inverse of the raised button, so the affordance is
+   unambiguous — you press what is raised, you type into what is sunk.
+   ------------------------------------------------------------------------- */
+.form-group { margin-bottom: 1rem; }
+
+label, .control-label, .form-label {
+    font: var(--nx-type-label-sm);
+    letter-spacing: var(--nx-track-label);
+    color: var(--nx-ink-2);
+    font-weight: 500;
+}
+
+.form-control,
+input.form-control,
+textarea.form-control,
+select.form-control {
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    border: 0;
+    border-radius: var(--nx-radius-sm);
+    padding: 0.5rem 0.7rem;
+    height: auto;
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.16),
+                inset 0 -1px 0 var(--nx-light), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    transition: box-shadow var(--nx-t-fast) linear;
+}
+
+.form-control::placeholder { color: var(--nx-ink-ph); opacity: 1; }
+
+.form-control:focus {
+    border: 0;
+    outline: none;
+    color: var(--nx-ink);
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.16),
+                0 0 0 2px var(--nx-accent);
+}
+
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control {
+    background: var(--nx-base);
+    color: var(--nx-ink-3);
+    cursor: not-allowed;
+    box-shadow: var(--nx-sink-sm);
+}
+
+.form-control-feedback { color: var(--nx-ink-3); }
+
+.help-block, .text-help {
+    font: var(--nx-type-body-sm);
+    letter-spacing: 0.4px;
+    color: var(--nx-ink-2);
+}
+
+.has-error .form-control { box-shadow: var(--nx-sink-sm), 0 0 0 2px var(--nx-danger); }
+.has-error .control-label, .has-error .help-block { color: var(--nx-danger-ink); }
+.has-success .form-control { box-shadow: var(--nx-sink-sm), 0 0 0 2px var(--nx-success); }
+
+/* required / optional markers shipped by pterodactyl.css */
+label.control-label > span { color: var(--nx-danger-ink); font-style: normal; font-weight: 500; }
+label.control-label > span.field-required:before { content: "required"; color: var(--nx-danger-ink); }
+label.control-label > span.field-optional:before { content: "optional"; color: var(--nx-ink-3); }
+
+.input-group-addon {
+    background: var(--nx-base);
+    border: 1px solid var(--nx-edge);
+    color: var(--nx-ink-2);
+    border-radius: var(--nx-radius-sm);
+}
+
+/* checkboxes + radios ride the theme accent; the shipped sheet hardcodes blue */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--nx-accent); }
+.radio label, .checkbox label, .radio-inline, .checkbox-inline {
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    color: var(--nx-ink);
+}
+
+/* toggle switches (AdminLTE .btn-toggle) */
+.btn-toggle { background: var(--nx-sunken); color: var(--nx-ink-2); box-shadow: var(--nx-sink-sm); }
+.btn-toggle:hover, .btn-toggle:focus { background: var(--nx-sunken-2); }
+.btn-toggle.active { background: var(--nx-accent); color: var(--nx-ink-inv); box-shadow: var(--nx-sink-sm); }
+
+/* ------------------------------------------------------------------ buttons
+   A button is a PLATED CAP: raised at rest, and on press it sinks and travels
+   1px toward the light source. Semantic variants reuse the fixed plate tokens
+   so white label text always clears contrast in both themes.
+
+   SEGMENTED CONTROLS: upstream markup paints every segment `.btn-primary`, so
+   the accent plate alone cannot express "which one is chosen" — all three would
+   look identical (verified: all three computed to the same gradient). Inside a
+   `[data-toggle="buttons"]` group the physics carries the state instead:
+   unselected = a NEUTRAL raised key, selected = the accent plate pressed IN.
+   One glance answers "which is chosen", and it matches the rest of the system.
+   ------------------------------------------------------------------------- */
+.btn {
+    font: var(--nx-type-label);
+    letter-spacing: var(--nx-track-label);
+    border: 0;
+    border-radius: var(--nx-radius-sm);
+    padding: 0.5rem 1rem;
+    min-height: 2.5rem;
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: var(--nx-raise-sm), var(--nx-bevel-top), var(--nx-bevel-bottom);
+    transition: box-shadow var(--nx-t-fast) var(--nx-ease-press),
+                transform var(--nx-t-fast) var(--nx-ease-press),
+                background var(--nx-t-fast) linear;
+}
+
+.btn:hover, .btn:focus {
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: var(--nx-raise-sm), var(--nx-bevel-top), var(--nx-bevel-bottom);
+}
+
+.btn:active, .btn.active, .btn.active.focus {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    color: var(--nx-ink);
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.12);
+    transform: translateY(1px);
+}
+
+.btn:disabled, .btn.disabled {
+    opacity: 0.55;
+    box-shadow: var(--nx-sink-sm);
+    transform: none;
+    cursor: not-allowed;
+}
+
+.btn-sm { padding: 0.3rem 0.7rem; min-height: 2rem; font: var(--nx-type-label-sm); }
+.btn-xs { padding: 0.2rem 0.55rem; min-height: 1.75rem; font: var(--nx-type-label-sm); }
+.btn-lg { padding: 0.7rem 1.3rem; min-height: 3rem; font: var(--nx-type-label); }
+
+/* plated caps */
+.btn-primary, .btn-info {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    box-shadow: 3px 3px 9px var(--nx-accent-shade), -3px -3px 9px var(--nx-light),
+                inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 -2px 5px rgba(0, 0, 0, 0.26);
+}
+
+.btn-success {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-success), var(--nx-plate-success-deep));
+    box-shadow: 3px 3px 9px color-mix(in srgb, var(--nx-plate-success) 34%, transparent),
+                -3px -3px 9px var(--nx-light),
+                inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -2px 5px rgba(0, 0, 0, 0.24);
+}
+
+.btn-warning {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-warning), var(--nx-plate-warning-deep));
+    box-shadow: 3px 3px 9px color-mix(in srgb, var(--nx-plate-warning) 34%, transparent),
+                -3px -3px 9px var(--nx-light),
+                inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -2px 5px rgba(0, 0, 0, 0.24);
+}
+
+.btn-danger {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-danger), var(--nx-plate-danger-deep));
+    box-shadow: 3px 3px 9px color-mix(in srgb, var(--nx-plate-danger) 34%, transparent),
+                -3px -3px 9px var(--nx-light),
+                inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -2px 5px rgba(0, 0, 0, 0.24);
+}
+
+.btn-primary:hover, .btn-primary:focus,
+.btn-info:hover, .btn-info:focus,
+.btn-success:hover, .btn-success:focus,
+.btn-warning:hover, .btn-warning:focus,
+.btn-danger:hover, .btn-danger:focus {
+    color: #fff;
+    filter: brightness(1.06);
+}
+
+/* A SELECTED plate must stay a plate. AdminLTE marks the chosen segment with
+   `.active`, and the generic `.btn.active` rule above would otherwise repaint it
+   as a light raised face while `.btn-primary.active` keeps white text — white on
+   light, ~1.2:1. Each plate therefore re-states its own background when active
+   and shows the press as an INSET shadow: selected = sunk, unselected = raised. */
+.btn-primary:active, .btn-primary.active, .btn-primary.active.focus,
+.btn-info:active, .btn-info.active, .btn-info.active.focus {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    filter: none;
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.btn-success:active, .btn-success.active, .btn-success.active.focus {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-success), var(--nx-plate-success-deep));
+    filter: none;
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.btn-warning:active, .btn-warning.active, .btn-warning.active.focus {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-warning), var(--nx-plate-warning-deep));
+    filter: none;
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.btn-danger:active, .btn-danger.active, .btn-danger.active.focus {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-danger), var(--nx-plate-danger-deep));
+    filter: none;
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.btn-default { color: var(--nx-ink); }
+.btn-link { box-shadow: none; background: transparent; color: var(--nx-accent-ink); }
+.btn-link:hover { box-shadow: none; background: transparent; text-decoration: underline; }
+.btn-clear { background: transparent; box-shadow: none; }
+.btn-clear:hover { background: transparent; box-shadow: none; }
+
+.btn-group .btn { border-radius: 0; }
+.btn-group > .btn:first-child { border-radius: var(--nx-radius-sm) 0 0 var(--nx-radius-sm); }
+.btn-group > .btn:last-child { border-radius: 0 var(--nx-radius-sm) var(--nx-radius-sm) 0; }
+
+/* ------------------------------------------------------------------- tables
+   Dense data, tabular numerals, hairline rules only. No zebra stripes and no
+   vertical rules — the eye tracks a row better on a clean field.
+   ------------------------------------------------------------------------- */
+.table {
+    color: var(--nx-ink);
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    font-variant-numeric: tabular-nums;
+}
+
+.table > thead > tr > th,
+.table > tbody > tr > th,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > tbody > tr > td,
+.table > tfoot > tr > td {
+    border-top: 1px solid var(--nx-edge);
+    padding: 0.6rem 0.75rem;
+    vertical-align: middle;
+}
+
+.table > thead > tr > th {
+    font: var(--nx-type-label-sm);
+    letter-spacing: var(--nx-track-label);
+    color: var(--nx-ink-2);
+    border-bottom: 1px solid var(--nx-edge);
+    text-transform: none;
+}
+
+.table > tbody > tr:hover { background: var(--nx-base); }
+.table-hover > tbody > tr:hover { background: var(--nx-base); }
+
+.table-striped > tbody > tr:nth-of-type(odd) { background: transparent; }
+
+/* the expandable server-description row must not draw its own top rule */
+.server-description > td { padding-top: 0 !important; border-top: 0 !important; }
+tr:hover + tr.server-description { background: var(--nx-base) !important; }
+
+.table-responsive { border: 0; }
+
+/* -------------------------------------------------------------- nav tabs
+   The settings tabs are the clearest "where am I" signal in the admin, so the
+   active tab gets the accent rail and the tinted wash — same treatment as the
+   active sidebar row, so one vocabulary describes both.
+   ------------------------------------------------------------------------- */
+.nav-tabs-custom {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border-radius: var(--nx-radius-lg);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top),
+                inset 0 0 0 1px var(--nx-edge);
+}
+
+.nav-tabs-custom > .nav-tabs {
+    border-bottom: 1px solid var(--nx-edge);
+    background: transparent;
+}
+
+.nav-tabs-custom > .nav-tabs > li > a {
+    font: var(--nx-type-label);
+    letter-spacing: var(--nx-track-label);
+    color: var(--nx-ink-2);
+    border-radius: 0;
+    margin-right: 0;
+    transition: color var(--nx-t-fast) linear, background var(--nx-t-fast) linear;
+}
+
+.nav-tabs-custom > .nav-tabs > li > a:hover {
+    color: var(--nx-ink);
+    background: var(--nx-base);
+}
+
+.nav-tabs-custom > .nav-tabs > li.active {
+    border-top-color: var(--nx-accent);
+}
+
+.nav-tabs-custom > .nav-tabs > li.active > a,
+.nav-tabs-custom > .nav-tabs > li.active:hover > a {
+    color: var(--nx-accent-ink);
+    background: var(--nx-accent-soft);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    font-weight: 500;
+}
+
+.nav-tabs-custom.nav-tabs-floating > .nav-tabs { border-bottom: 0 !important; }
+
+.nav > li > a:hover, .nav > li > a:focus { background: var(--nx-base); }
+
+/* ------------------------------------------------------- alerts / callouts
+   Alert = a tinted lens. Colour is carried by the border + ink, never by a
+   saturated fill, so long text stays readable and the state is still obvious.
+   ------------------------------------------------------------------------- */
+.alert {
+    border: 1px solid var(--nx-edge);
+    border-left-width: 3px;
+    border-radius: var(--nx-radius-sm);
+    font: var(--nx-type-body);
+    letter-spacing: var(--nx-track-body);
+    padding: 0.75rem 1rem;
+    color: var(--nx-ink);
+    background: var(--nx-raised);
+}
+
+.alert-danger { border-left-color: var(--nx-danger); background: var(--nx-danger-soft); color: var(--nx-danger-ink); }
+.alert-success { border-left-color: var(--nx-success); background: var(--nx-success-soft); color: var(--nx-success-ink); }
+.alert-warning { border-left-color: var(--nx-warning); background: var(--nx-warning-soft); color: var(--nx-warning-ink) !important; }
+.alert-info { border-left-color: var(--nx-info); background: var(--nx-accent-soft); color: var(--nx-accent-ink); }
+
+/* pterodactyl.css paints alert-warning as a solid orange slab with white text */
+.alert-warning { background: var(--nx-warning-soft) !important; }
+.alert-warning a { color: var(--nx-warning-ink); font-weight: 500; }
+.alert-danger a { color: var(--nx-danger-ink); font-weight: 500; }
+
+.alert .close { color: inherit; opacity: 0.6; text-shadow: none; }
+.alert .close:hover { opacity: 1; }
+
+/* AdminLTE callouts (the "callout-slim" variants ship !important overrides) */
+.callout {
+    border-radius: var(--nx-radius-sm);
+    border-left-width: 3px;
+    background: var(--nx-raised);
+    color: var(--nx-ink);
+}
+
+.callout.callout-info.callout-slim { border-color: var(--nx-info) !important; color: var(--nx-ink-2) !important; background: transparent !important; }
+.callout.callout-danger.callout-slim { border-color: var(--nx-danger) !important; color: var(--nx-ink-2) !important; background: transparent !important; }
+.callout.callout-warning.callout-slim { border-color: var(--nx-warning) !important; color: var(--nx-ink-2) !important; background: transparent !important; }
+.callout.callout-success.callout-slim { border-color: var(--nx-success) !important; color: var(--nx-ink-2) !important; background: transparent !important; }
+.callout.callout-default.callout-slim { border-color: var(--nx-edge) !important; color: var(--nx-ink-2) !important; background: transparent !important; }
+.callout a { color: var(--nx-accent-ink); }
+
+/* badges / labels — small stamped plates */
+.label, .badge {
+    font: var(--nx-type-label-sm);
+    letter-spacing: var(--nx-track-label);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    color: var(--nx-ink-inv);
+    background: var(--nx-ink-2);
+}
+
+.label-default { background: var(--nx-ink-3) !important; color: var(--nx-ink-inv); }
+.label-primary { background: var(--nx-plate-accent); }
+.label-success { background: var(--nx-plate-success); }
+.label-warning { background: var(--nx-plate-warning); }
+.label-danger { background: var(--nx-plate-danger); }
+.label-info { background: var(--nx-plate-accent); }
+
+/* ------------------------------------------------------------------- modals
+   A modal is the same raised card, one layer up: stronger lift, a scrim that
+   actually dims, and the same radius scale.
+   ------------------------------------------------------------------------- */
+.modal-backdrop.in { opacity: 0.55; background: var(--nx-mask); }
+
+.modal-content {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border: 0;
+    border-radius: var(--nx-radius-lg);
+    color: var(--nx-ink);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-lg),
+                inset 0 0 0 1px var(--nx-edge);
+}
+
+.modal-header {
+    background: transparent;
+    border-bottom: 1px solid var(--nx-edge);
+    color: var(--nx-ink);
+}
+
+.modal-title { font: var(--nx-type-title); letter-spacing: var(--nx-track-title); }
+
+.modal-body { background: transparent; color: var(--nx-ink); }
+
+.modal-footer {
+    background: transparent;
+    border-top: 1px solid var(--nx-edge);
+}
+
+.modal-header .close { color: var(--nx-ink-2); text-shadow: none; opacity: 0.7; }
+.modal-header .close:hover { opacity: 1; }
+
+/* ------------------------------------------------------------------ select2 */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    border: 0;
+    border-radius: var(--nx-radius-sm);
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.16),
+                inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    min-height: 2.4rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--nx-ink);
+    line-height: 2.4rem;
+    padding-left: 0.7rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 2.4rem; }
+
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border: 0 !important;
+    box-shadow: var(--nx-sink-sm), 0 0 0 2px var(--nx-accent) !important;
+}
+
+.select2-dropdown {
+    background: var(--nx-raised);
+    border: 1px solid var(--nx-edge);
+    border-radius: var(--nx-radius-sm);
+    color: var(--nx-ink);
+    box-shadow: var(--nx-raise-lg);
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken)) !important;
+    border: 0 !important;
+    color: var(--nx-ink) !important;
+    box-shadow: var(--nx-sink-sm);
+}
+
+.select2-results__option {
+    background: var(--nx-raised);
+    color: var(--nx-ink);
+    font: var(--nx-type-body);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+    background: var(--nx-accent) !important;
+    color: var(--nx-ink-inv);
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background: var(--nx-accent-soft);
+    color: var(--nx-ink);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--nx-accent-soft);
+    border: 1px solid var(--nx-accent);
+    color: var(--nx-accent-ink);
+    border-radius: var(--nx-radius-sm);
+}
+
+/* ------------------------------------------------------- code / pre / wells */
+code, kbd, samp {
+    font-family: var(--nxx-mono);
+    font-size: 0.85em;
+    background: var(--nx-sunken);
+    color: var(--nx-ink);
+    border: 1px solid var(--nx-edge);
+    border-radius: var(--nx-radius-sm);
+    padding: 0.1em 0.35em;
+}
+
+pre {
+    font-family: var(--nxx-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    color: var(--nx-ink);
+    border: 0;
+    border-radius: var(--nx-radius);
+    box-shadow: var(--nx-sink), inset 0 2px 3px rgba(0, 0, 0, 0.2);
+    padding: 0.85rem 1rem;
+}
+
+pre code { background: transparent; border: 0; padding: 0; }
+
+.callout code { background: var(--nx-sunken); color: var(--nx-ink); border: 1px solid var(--nx-edge); }
+
+.well {
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    border: 0;
+    border-radius: var(--nx-radius);
+    color: var(--nx-ink);
+    box-shadow: var(--nx-sink), inset 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.well-lg { padding: 24px; }
+.well-sm { padding: 9px; }
+
+/* -------------------------------------------------------------- pagination */
+.pagination > li > a,
+.pagination > li > span {
+    font: var(--nx-type-label);
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border: 0;
+    box-shadow: var(--nx-raise-sm), var(--nx-bevel-top);
+    margin: 0 2px;
+    border-radius: var(--nx-radius-sm) !important;
+    transition: box-shadow var(--nx-t-fast) linear, color var(--nx-t-fast) linear;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover {
+    color: var(--nx-accent-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.24);
+}
+
+.pagination > .disabled > a,
+.pagination > .disabled > span { color: var(--nx-ink-3); box-shadow: var(--nx-sink-sm); }
+
+/* --------------------------------------------------------- small boxes / misc */
+.small-box {
+    border-radius: var(--nx-radius-lg);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top);
+}
+
+/* A .small-box is either a NEUTRAL card or a coloured PLATE, and the two need
+   opposite ink rules. AdminLTE assumes every box is a plate and hardcodes white
+   text; that is wrong for the neutral ones, which are re-surfaced here as
+   ordinary cards (white-on-light measured 1.17:1).
+
+   Neutral card: fill and ink both flip with the theme.
+   Coloured plate: a CONSTANT saturated face that must hold white text in both
+   themes, so the ink must NOT flip — using --nx-ink-inv here would put near-black
+   text on a dark plate in dark mode. */
+.small-box {
+    background: var(--nx-raised);
+    border-radius: var(--nx-radius-lg);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top);
+}
+.small-box h3, .small-box p, .small-box .small-box-footer { color: var(--nx-ink); }
+
+.small-box.bg-aqua, .small-box.bg-blue, .small-box.bg-light-blue, .small-box.bg-purple {
+    background: var(--nx-plate-accent) !important;
+}
+.small-box.bg-green { background: var(--nx-plate-success) !important; }
+.small-box.bg-yellow, .small-box.bg-orange { background: var(--nx-plate-warning) !important; }
+.small-box.bg-red, .small-box.bg-maroon { background: var(--nx-plate-danger) !important; }
+/* AdminLTE ships .bg-black as #111!important — a constant dark fill, so it is a
+   plate like the others and needs white text. Unused in the shipped views today,
+   but a box that is invisible the day someone adds it is not acceptable. */
+.small-box.bg-black { background: #111 !important; }
+
+.small-box.bg-aqua h3, .small-box.bg-aqua p, .small-box.bg-aqua .small-box-footer,
+.small-box.bg-blue h3, .small-box.bg-blue p, .small-box.bg-blue .small-box-footer,
+.small-box.bg-light-blue h3, .small-box.bg-light-blue p, .small-box.bg-light-blue .small-box-footer,
+.small-box.bg-purple h3, .small-box.bg-purple p, .small-box.bg-purple .small-box-footer,
+.small-box.bg-green h3, .small-box.bg-green p, .small-box.bg-green .small-box-footer,
+.small-box.bg-yellow h3, .small-box.bg-yellow p, .small-box.bg-yellow .small-box-footer,
+.small-box.bg-orange h3, .small-box.bg-orange p, .small-box.bg-orange .small-box-footer,
+.small-box.bg-red h3, .small-box.bg-red p, .small-box.bg-red .small-box-footer,
+.small-box.bg-maroon h3, .small-box.bg-maroon p, .small-box.bg-maroon .small-box-footer,
+.small-box.bg-black h3, .small-box.bg-black p, .small-box.bg-black .small-box-footer {
+    color: #fff !important;
+}
+
+/* The footer sits on its own surface, so its ink follows that surface rather than
+   the card. AdminLTE's translucent black wash becomes an unreadable pair with a
+   dark ink (measured 1.32:1), so the neutral card gets a real sunken strip. */
+.small-box .small-box-footer {
+    background: var(--nx-sunken);
+    border-radius: 0 0 var(--nx-radius-lg) var(--nx-radius-lg);
+}
+/* on a plate the wash is correct — it is a darker shade of the plate itself */
+.small-box.bg-aqua .small-box-footer, .small-box.bg-blue .small-box-footer,
+.small-box.bg-light-blue .small-box-footer, .small-box.bg-purple .small-box-footer,
+.small-box.bg-green .small-box-footer, .small-box.bg-yellow .small-box-footer,
+.small-box.bg-orange .small-box-footer, .small-box.bg-red .small-box-footer,
+.small-box.bg-maroon .small-box-footer, .small-box.bg-black .small-box-footer {
+    background: rgba(0, 0, 0, 0.14);
+}
+
+/* AdminLTE hardcodes `.small-box p>small{color:#f9f9f9}`, invisible on the
+   neutral card. */
+.small-box p > small { color: var(--nx-ink-2); }
+
+/* AdminLTE hardcodes `.info-box{background:#fff}` and `.info-box-icon{background:
+   rgba(0,0,0,.2)}`, which survives into dark mode as a white slab with near-white
+   text (measured 1.16:1). Re-surfaced as a raised card, with the icon plate
+   carrying the semantic colour instead of a translucent black wash. */
+.info-box {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border-radius: var(--nx-radius);
+    color: var(--nx-ink);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-sm), var(--nx-bevel-top),
+                inset 0 0 0 1px var(--nx-edge);
+    min-height: 90px;
+}
+
+.info-box-icon {
+    /* a neutral plate by default, using the same fill/flip pair the badges use
+       so a tile with no colour class is still legible in both themes */
+    background: var(--nx-ink-2);
+    color: var(--nx-ink-inv);
+    border-radius: var(--nx-radius) 0 0 var(--nx-radius);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.info-box-text {
+    font: var(--nx-type-label-sm);
+    letter-spacing: var(--nx-track-label);
+    color: var(--nx-ink-2);
+}
+
+.info-box-number {
+    font: var(--nx-type-title-lg);
+    color: var(--nx-ink);
+    font-weight: 700;
+}
+
+.info-box-number small { font: var(--nx-type-body-sm); font-weight: 400; color: var(--nx-ink-2); }
+
+.info-box .progress { background: var(--nx-sunken-2); }
+.info-box .progress .progress-bar { background: var(--nx-accent); }
+
+/* the runtime figures pair a bold number with a quiet unit; the unit must stay
+   legible on the raised card in both themes, so it inherits the ink rather than
+   falling back to a muted default */
+td.text-right strong small,
+.table small {
+    color: var(--nx-ink-2);
+}
+
+/* the icon plates keep white glyphs on a saturated fill, so each needs a value
+   that clears contrast in BOTH themes — the plate tokens do exactly that.
+   These need !important because the neutraliser block below sets `.bg-gray` and
+   `.bg-purple` with !important for general use, and without it the sampler icon
+   would inherit the page background and vanish into the card. */
+.info-box-icon.bg-aqua, .info-box-icon.bg-blue, .info-box-icon.bg-light-blue { background: var(--nx-plate-accent) !important; color: #fff !important; }
+.info-box-icon.bg-green { background: var(--nx-plate-success) !important; color: #fff !important; }
+.info-box-icon.bg-yellow, .info-box-icon.bg-orange { background: var(--nx-plate-warning) !important; color: #fff !important; }
+.info-box-icon.bg-red, .info-box-icon.bg-maroon { background: var(--nx-plate-danger) !important; color: #fff !important; }
+.info-box-icon.bg-purple { background: var(--nx-plate-accent) !important; color: #fff !important; }
+/* the neutral tile is NOT a coloured plate, so it uses the badge pair instead:
+   a flipping fill with the opposite flipping ink. The generic `.bg-gray` rule in
+   the neutraliser below sets `color: var(--nx-ink)`, which is the ink for text on
+   a neutral SURFACE, and that is exactly wrong on this dark plate — measured
+   1.78:1 (light) and 1.82:1 (dark). Hence the explicit override. */
+.info-box-icon.bg-black, .info-box-icon.bg-gray {
+    background: var(--nx-ink-2) !important;
+    color: var(--nx-ink-inv) !important;
+}
+
+.bg-gray { background-color: var(--nx-base) !important; color: var(--nx-ink) !important; }
+.bg-purple { background-color: var(--nx-plate-accent) !important; }
+
+/* scrollbars — a native-feeling control surface, not a desktop default */
+* { scrollbar-width: thin; scrollbar-color: var(--nx-ink-3) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: var(--nx-sunken-2);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--nx-ink-3); background-clip: content-box; }
+
+/* ------------------------------------------------------------ focus / a11y */
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--nx-base), 0 0 0 5px var(--nx-accent);
+    border-radius: var(--nx-radius-sm);
+}
+
+/* ============================================================================
+   NEUTRALISING THE SHIPPED !important OVERRIDES
+   ----------------------------------------------------------------------------
+   AdminLTE and pterodactyl.css paint badges, alerts, callouts and the odd
+   dropdown with `!important`. An unprefixed re-skin cannot win against those, so
+   this block answers them in kind and sits LAST in the file. Each rule exists
+   because a specific shipped declaration would otherwise survive — the comment
+   names the offender so the rule is never mistaken for cargo cult.
+   ========================================================================= */
+
+/* AdminLTE: .label-success/-danger/-warning/-info/-primary and .label itself all
+   carry background-color:…!important (the #00a65a / #dd4b39 / #f39c12 palette).
+   The badge keeps its shape; only the paint changes. */
+.label,
+.badge { background: var(--nx-ink-2) !important; color: var(--nx-ink-inv); }
+
+.label-default { background: var(--nx-ink-3) !important; color: var(--nx-ink-inv); }
+.label-primary, .label-info { background: var(--nx-plate-accent) !important; color: #fff; }
+.label-success { background: var(--nx-plate-success) !important; color: #fff; }
+.label-warning { background: var(--nx-plate-warning) !important; color: #fff; }
+.label-danger { background: var(--nx-plate-danger) !important; color: #fff; }
+
+/* pterodactyl.css paints every alert as a solid slab with white text
+   (color + background, both !important). The re-skin uses the tinted-lens
+   treatment instead: readable ink on a soft wash, state carried by the rail. */
+.alert-danger {
+    color: var(--nx-danger-ink) !important;
+    background: var(--nx-danger-soft) !important;
+    border: 1px solid var(--nx-edge);
+    border-left: 3px solid var(--nx-danger);
+}
+.alert-success {
+    color: var(--nx-success-ink) !important;
+    background: var(--nx-success-soft) !important;
+    border: 1px solid var(--nx-edge);
+    border-left: 3px solid var(--nx-success);
+}
+.alert-warning {
+    color: var(--nx-warning-ink) !important;
+    background: var(--nx-warning-soft) !important;
+    border: 1px solid var(--nx-edge);
+    border-left: 3px solid var(--nx-warning);
+}
+.alert-info {
+    color: var(--nx-accent-ink) !important;
+    background: var(--nx-accent-soft) !important;
+    border: 1px solid var(--nx-edge);
+    border-left: 3px solid var(--nx-info);
+}
+
+/* AdminLTE: .label-default ships #eef1f6!important; .bg-purple #79589f!important;
+   pterodactyl.css: .bg-gray #33404d!important. */
+.bg-gray { background-color: var(--nx-base) !important; color: var(--nx-ink) !important; }
+.bg-purple { background-color: var(--nx-plate-accent) !important; color: #fff; }
+
+/* pterodactyl.css: .content-header>.breadcrumb { background:#1f2933!important } */
+.content-header > .breadcrumb { background: transparent !important; }
+
+/* Upstream paints node status with INLINE styles carrying the old Bootstrap
+   palette: #50af51 on the https lock and the live heartbeat, #d9534f on the
+   unlock and the error state. An inline style beats any ordinary rule, so
+   matching it is the one case where !important is genuinely required rather than
+   a shortcut. Measured, the green is 2.55:1 on the light card — below the 3:1
+   floor for a non-text glyph — so it is remapped onto the success/danger tokens,
+   which are tuned to clear their own surface in both themes.
+   Trade-off: the selector matches the shipped hex, so if upstream changes those
+   values the rule stops applying (the icon then simply reverts to its own
+   colour — it does not break). */
+[style*="#50af51"], [style*="#50af51"] i { color: var(--nx-success) !important; }
+[style*="#d9534f"], [style*="#d9534f"] i { color: var(--nx-danger) !important; }
+
+/* AdminLTE dropdown panels are hardcoded white with #444 links (!important),
+   which survives into dark mode as a bright slab. Re-surface them. */
+.navbar-nav > .notifications-menu > .dropdown-menu > li.footer > a,
+.navbar-nav > .messages-menu > .dropdown-menu > li.footer > a,
+.navbar-nav > .tasks-menu > .dropdown-menu > li.footer > a,
+.navbar-nav > .user-menu > .dropdown-menu > .user-body a,
+.box-header > .box-tools .dropdown-menu > li > a {
+    background: var(--nx-raised) !important;
+    color: var(--nx-ink) !important;
+}
+
+.dropdown-menu {
+    background: var(--nx-raised);
+    border: 1px solid var(--nx-edge);
+    border-radius: var(--nx-radius-sm);
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-lg), inset 0 0 0 1px var(--nx-edge);
+}
+
+.dropdown-menu > li > a { color: var(--nx-ink); }
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus { background: var(--nx-base); color: var(--nx-ink); }
+.dropdown-menu > .divider { background-color: var(--nx-edge); }
+
+/* pterodactyl.css: .callout-slim a { color:#555!important } — too dim in dark. */
+.callout.callout-slim a,
+.callout-slim a { color: var(--nx-accent-ink) !important; }
+
+/* pterodactyl.css: tr:hover + tr.server-description { background:#f5f5f5!important } */
+tr:hover + tr.server-description { background-color: var(--nx-base) !important; }
+
+/* AdminLTE: .select2 focus/search borders are #3c8dbc!important */
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border-color: var(--nx-edge) !important;
+    background-color: var(--nx-sunken) !important;
+    color: var(--nx-ink) !important;
+}
+
+/* --- segmented controls (radio-as-buttons) --------------------------------
+   Upstream marks EVERY segment `.btn-primary`, so plate colour alone cannot
+   show the selection. Physics does: the group is a neutral track, each
+   unselected segment is a raised key on it, and the chosen one is pressed IN
+   and plated with the accent. Placed last so it also beats the `.btn-primary`
+   plate rules above (same specificity, later source order wins). */
+.btn-group[data-toggle="buttons"] > label.btn,
+.btn-group[data-toggle="buttons"] > label.btn.btn-primary {
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: var(--nx-raise-sm), var(--nx-bevel-top), var(--nx-bevel-bottom);
+    transform: none;
+    filter: none;
+}
+
+.btn-group[data-toggle="buttons"] > label.btn:hover,
+.btn-group[data-toggle="buttons"] > label.btn:focus {
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    filter: brightness(1.03);
+}
+
+/* the chosen segment: accent plate, sunk, and visibly committed */
+.btn-group[data-toggle="buttons"] > label.btn.active,
+.btn-group[data-toggle="buttons"] > label.btn.btn-primary.active,
+.btn-group[data-toggle="buttons"] > label.btn.active:hover,
+.btn-group[data-toggle="buttons"] > label.btn.active.focus {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-accent), var(--nx-plate-accent-deep));
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+    filter: none;
+}
+
+/* the hidden radio must not swallow the label's hit area */
+.btn-group[data-toggle="buttons"] > label.btn > input[type="radio"] {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------ theme switch
+   A theme change is one physical event — the lights going up or down — so
+   everything must move together. Gated behind `html.nx-theming`, added only for
+   the duration of the switch: a permanent transition on every element would
+   smear the hover/press feedback the physics depends on.
+   ------------------------------------------------------------------------- */
+html.nx-theming,
+html.nx-theming *,
+html.nx-theming *::before,
+html.nx-theming *::after {
+    transition: background-color var(--nx-t) linear, background-image var(--nx-t) linear,
+                border-color var(--nx-t) linear, color var(--nx-t) linear,
+                fill var(--nx-t) linear, stroke var(--nx-t) linear,
+                box-shadow var(--nx-t) linear !important;
+}
+
+/* ------------------------------------------------------- reduced motion
+   Mandatory, not optional: honour the OS setting for anyone who asked for it. */
+@media (prefers-reduced-motion: reduce) {
+    html.nx-theming,
+    html.nx-theming *,
+    html.nx-theming *::before,
+    html.nx-theming *::after {
+        transition: none !important;
+    }
+
+    .btn,
+    .pagination > li > a,
+    .pagination > li > span {
+        transition: none !important;
+    }
+
+    .btn:active, .btn.active { transform: none; }
+}
+
+/* -------------------------------------------------------------- print
+   Admin pages do get printed (invoices, configs). Drop the chrome and the
+   shadows so the sheet stays legible on paper. */
+@media print {
+    .main-header, .main-sidebar, .main-footer, .content-header { display: none !important; }
+    .content-wrapper { margin: 0 !important; background: #fff !important; }
+    .box { box-shadow: none !important; border: 1px solid #ccc !important; }
+}

@@ -1,0 +1,13 @@
+# Backups created by install.sh — these contain a copy of your panel and must
+# never be committed. They are per-install and can be large.
+backups/
+
+# Local build artefacts
+nixeon/node_modules/
+nixeon/.yarn/
+*.log
+.DS_Store
+
+# Never commit environment files
+.env
+.env.*

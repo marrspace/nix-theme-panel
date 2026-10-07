@@ -1,0 +1,229 @@
+/* ============================================================================
+   ACTIVITY — a ledger, not a list.
+
+   The old layout was a stack of rows separated by `border-gray-800`. In the light
+   theme gray-800 resolves to a near-white value, so the separators vanished and
+   the whole log read as an undifferentiated wall of text.
+
+   It is rebuilt as a bound ledger: a raised card with a sunken spine running down
+   the left, and each event a NODE pinned to that spine. The node is a small
+   milled disc holding the actor's avatar, so the eye can travel the spine and
+   read the log as a sequence of stamped entries rather than a text dump.
+   ========================================================================= */
+
+/* the card that binds the entries */
+.ledger {
+    position: relative;
+    border-radius: var(--nx-radius-lg);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top),
+        inset 0 0 0 1px var(--nx-edge);
+    overflow: hidden;
+}
+
+/* the spine: a shallow groove down the left of the ledger.
+   It must pass through the CENTRE of the avatar nodes, not merely sit near them —
+   the whole point of a spine is that the entries hang off it. The node is the
+   entry's left padding (0.75rem) plus half its own width (1.5rem at base, 1.75rem
+   from sm up), so the spine is offset from the same two values. */
+.spine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(0.75rem + 1.5rem - 1px);
+    width: 2px;
+    background: var(--nx-sunken-2);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), 1px 0 0 var(--nx-light);
+    pointer-events: none;
+
+    @screen sm {
+        left: calc(0.75rem + 1.75rem - 1px);
+    }
+}
+
+/* one entry: the node on the spine + the body */
+.entry {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1rem 1rem 0.75rem;
+    transition: background var(--nx-t-fast) linear;
+
+    /* a hairline groove BETWEEN entries, drawn as a groove (dark + lit) rather
+       than a flat border — the same rule as .nx-divider */
+    &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 3.75rem;
+        right: 1rem;
+        bottom: 0;
+        height: 0;
+        border-top: 1px solid var(--nx-edge);
+        box-shadow: 0 1px 0 var(--nx-light);
+
+        @screen sm {
+            left: 4.75rem;
+        }
+    }
+
+    &:hover {
+        background: color-mix(in srgb, var(--nx-sunken) 45%, transparent);
+
+        &::after {
+            /* keep the groove visible over the hover tint */
+            opacity: 0.7;
+        }
+    }
+
+    /* the entry the filter is pointing at (arrived from a deep link) */
+    &.is-target {
+        background: var(--nx-accent-soft);
+    }
+}
+
+/* the actor node: an avatar pressed into a milled disc on the spine */
+.node {
+    position: relative;
+    flex: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    /* the disc is raised off the ledger face, so the avatar reads as set into it */
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-sm), var(--nx-bevel-top),
+        inset 0 0 0 1px var(--nx-edge);
+
+    @screen sm {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+
+    /* the avatar itself is a lens inside the disc */
+    & > .avatar {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.35),
+            0 0 0 1px var(--nx-sunken-2);
+
+        @screen sm {
+            width: 2.75rem;
+            height: 2.75rem;
+        }
+    }
+}
+
+/* the body of an entry */
+.body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 0.15rem;
+}
+
+/* the actor line: name — event, set in the mono face because the event is a
+   machine identifier, not prose */
+.headline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--nx-ink);
+
+    & .actor {
+        font-weight: 700;
+    }
+
+    & .sep {
+        color: var(--nx-ink-3);
+    }
+
+    & .event {
+        font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--nx-accent-ink);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color var(--nx-t-fast) linear;
+
+        &:hover {
+            border-bottom-color: currentColor;
+        }
+    }
+}
+
+/* the human-readable description */
+.description {
+    margin-top: 0.2rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    word-break: break-word;
+    color: var(--nx-ink-2);
+
+    & strong {
+        font-weight: 600;
+        color: var(--nx-ink);
+        word-break: break-all;
+    }
+}
+
+/* the metadata strip: IP + relative time, stamped small */
+.meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--nx-ink-3);
+
+    & .dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.6;
+    }
+
+    & .time {
+        cursor: help;
+    }
+}
+
+/* the API / SFTP provenance icons, at the end of the headline */
+.icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-left: 0.25rem;
+    color: var(--nx-ink-3);
+
+    & svg {
+        height: 1rem;
+        width: auto;
+        padding: 0 0.1rem;
+        cursor: help;
+    }
+
+    & svg:hover {
+        color: var(--nx-ink);
+    }
+}
+
+/* the empty state — a blank ledger page */
+.empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--nx-ink-3);
+    font-size: 0.875rem;
+}

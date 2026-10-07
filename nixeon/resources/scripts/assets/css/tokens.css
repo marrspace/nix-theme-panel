@@ -1,0 +1,570 @@
+/* ============================================================================
+   NIXEON 408 — DESIGN TOKENS
+   Surface: "Titanium" (B)  ·  Accent: "Orbit Blue" (A)  ·  Type: Fraunces + Karla
+   ----------------------------------------------------------------------------
+   Two-layer strategy so the whole panel themes without editing 169 components:
+   - :root holds the LIGHT theme (default).
+   - .dark on <html> overrides the same custom properties.
+   - The neutral/gray scales are defined as CSS vars in tailwind.config.js, so an
+     existing `bg-neutral-800` becomes a raised light surface automatically.
+   ========================================================================= */
+
+:root {
+    color-scheme: light;
+
+    /* ---- surfaces (Titanium) ------------------------------------------- */
+    --nx-base: #e7e9e8;          /* page field */
+    --nx-raised: #f2f4f3;        /* top of a raised face */
+    --nx-raised-2: #e0e3e2;      /* bottom of a raised face (bevel) */
+    --nx-sunken: #d8dcdb;        /* inside a well / input */
+    --nx-sunken-2: #cfd4d3;
+    --nx-edge: #d2d7d6;          /* hairline separators */
+
+    /* ---- ink ----------------------------------------------------------- */
+    --nx-ink: #22282d;           /* primary text */
+    --nx-ink-2: #5c666e;         /* secondary text */
+    --nx-ink-3: #8a9299;         /* tertiary / placeholder */
+    --nx-ink-inv: #f4f7f6;       /* text on an accent surface */
+    --nx-ink-ph: #5a636a;        /* placeholder — 4.25:1 on the sunken well */
+
+    /* ---- accent (Orbit Blue) ------------------------------------------- */
+    --nx-accent: #2f6bd8;
+    --nx-accent-light: #6fb4ff;
+    --nx-accent-deep: #1e4fa8;
+    --nx-accent-soft: #e4ecfa;   /* tinted wash for selection */
+    /* accent used as TEXT/label ON a surface: deep on light, bright on dark. Using
+       --nx-accent-deep for both made the active tab 3.61:1 in dark (fails AA). */
+    --nx-accent-ink: #1e4fa8;
+
+    /* ---- semantic ------------------------------------------------------ */
+    /* Lamp values: solid coloured plates that carry WHITE text. The semantic
+       colours must get BRIGHTER in dark mode to stay legible as text, which makes
+       them too light to hold white text (dark success was 2.74:1). A painted
+       indicator lens keeps its colour regardless of the room, so these are fixed
+       in both themes. */
+    --nx-lamp-success: #2f7d4f;
+    --nx-lamp-danger: #b23a32;
+    --nx-lamp-warning: #9a6b12;
+    --nx-lamp-accent: #2f6bd8;
+    /* Button PLATES. A plated cap carries white text, so it needs a value that
+       clears 4.5:1 against white. The accent token doubles as TEXT (which must be
+       bright on dark), so the two roles are separated here: plates are fixed, and
+       are the same plating whether the room is lit or dark. */
+    --nx-plate-accent: #2f6bd8;
+    --nx-plate-accent-deep: #1e4fa8;
+    --nx-plate-danger: #b23a32;
+    --nx-plate-danger-deep: #7a231e;
+    --nx-danger: #b23a32;
+    --nx-danger-soft: #f6e3e1;
+    --nx-success: #2f7d4f;
+    --nx-success-soft: #e0f0e7;
+    --nx-warning: #9a6b12;
+    --nx-warning-soft: #f7eeda;
+    --nx-info: #2f6bd8;
+
+    /* Semantic INK — the colour when it is TEXT or an ICON sitting on a surface.
+       The semantic tokens above double as enamelled plates (white text on them),
+       and a plate and its ink pull in opposite directions: brightening the ink for
+       dark mode makes it too pale to hold white text (dark danger measured 3.51:1
+       as a plate) and darkening it for the plate makes it illegible as text (dark
+       error copy measured 3.52:1 on a raised card). So the roles are separated:
+       `--nx-*-ink` is read on a surface, `--nx-plate-*` carries white text. */
+    --nx-danger-ink: #a7372f;
+    --nx-success-ink: #286a43;
+    --nx-warning-ink: #7c560f;
+
+    /* plated caps for the remaining semantics (a plated cap is the same colour
+       whether the room is lit or dark, so these are not re-declared in html.dark) */
+    --nx-plate-warning: #9a6b12;
+    --nx-plate-warning-deep: #6b4a0d;
+    --nx-plate-success: #2f7d4f;
+    --nx-plate-success-deep: #1f5736;
+
+    /* ---- the physics ---------------------------------------------------
+       Every shadow in the UI is built from these four values. Light comes
+       from the upper-left, so the highlight sits top-left and the shade
+       bottom-right. This is what makes a surface read as physically raised. */
+    --nx-light: rgba(255, 255, 255, 0.95);
+    --nx-shade: rgba(158, 168, 175, 0.62);
+    --nx-shade-strong: rgba(140, 152, 161, 0.78);
+    --nx-contact: rgba(120, 133, 143, 0.34);   /* tight contact shadow */
+
+    /* raised face — three stacked shadows: contact, ambient, diffuse */
+    --nx-raise-sm: 2px 2px 5px var(--nx-shade), -2px -2px 5px var(--nx-light);
+    --nx-raise: 5px 5px 12px var(--nx-shade), -5px -5px 12px var(--nx-light);
+    --nx-raise-lg: 9px 9px 22px var(--nx-shade), -9px -9px 22px var(--nx-light);
+    /* pressed / sunken */
+    --nx-sink: inset 4px 4px 9px var(--nx-shade), inset -4px -4px 9px var(--nx-light);
+    --nx-sink-sm: inset 2px 2px 5px var(--nx-shade), inset -2px -2px 5px var(--nx-light);
+    --nx-sink-lg: inset 6px 6px 14px var(--nx-shade), inset -6px -6px 14px var(--nx-light);
+
+    /* accent-tinted shadows (for primary buttons) */
+    --nx-accent-shade: rgba(47, 107, 216, 0.38);
+
+    /* ---- machined bevel (the skeuomorphic layer) -----------------------
+       A real control has a chamfered lip: a bright top edge, a dark bottom
+       edge, and a specular line. These two compose that lip. */
+    --nx-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --nx-bevel-bottom: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+    --nx-rim: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    /* the hard key bevel: a 1px lit top lip and a 1px shadow tucked under the
+       bottom edge. Blurred shadows alone read as "faint chip"; these two pixels
+       are what make a control read as a key at normal size. */
+    --nx-key: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 1px 0 var(--nx-shade-strong);
+
+    /* ---- control face -------------------------------------------------
+       A bare control cannot reuse --nx-raised: on a card, --nx-raised IS the
+       card's own material, so the control has no edge and disappears. Controls
+       get their own slightly brighter face and a defined rim. */
+    --nx-control: #f7f9f8;
+    --nx-control-2: #e6eae9;
+    --nx-control-edge: #b3bcbb;
+
+    /* ---- radii --------------------------------------------------------- */
+    --nx-radius-sm: 9px;
+    --nx-radius: 13px;
+    --nx-radius-lg: 18px;
+    --nx-radius-xl: 24px;
+
+    /* ---- brand mark ------------------------------------------------ */
+    --nx-mark-1: #f4f8fc;
+    --nx-mark-2: #c6d3e2;
+    --nx-mark-3: #93a8c0;
+    --nx-mark-4: #5e7189;
+    --nx-sparkle: #eaf3ff;
+    --nx-tile-shadow: 5px 5px 12px rgba(158, 168, 175, 0.62), -5px -5px 12px rgba(255, 255, 255, 0.95), inset 0 1px 0 #fff;
+
+    /* ---- motion --------------------------------------------------------
+       Physical objects do not ease linearly. "press" snaps in, "release"
+       settles with a touch of overshoot. */
+    --nx-ease-press: cubic-bezier(0.34, 0.9, 0.5, 1);
+    --nx-ease-settle: cubic-bezier(0.34, 1.45, 0.5, 1);
+    --nx-t-fast: 110ms;
+    --nx-t: 180ms;
+    --nx-t-slow: 320ms;
+
+    /* ---- layout -------------------------------------------------------- */
+    --nx-tap: 44px;              /* minimum touch target */
+    --nx-header-h: 60px;
+}
+
+/* ============================================================================
+   DARK THEME
+   Not an inversion — a genuinely different material. Dark neumorphism uses a
+   black shade plus a *very* faint white highlight (a real dark surface catches
+   little light), and the "base" sits above pure black so raised faces can read.
+   ========================================================================= */
+html.dark {
+    color-scheme: dark;
+
+    --nx-base: #1d242f;
+    --nx-raised: #2c3544;
+    --nx-raised-2: #1e2531;
+    --nx-sunken: #12171f;
+    --nx-sunken-2: #070a0f;
+    --nx-edge: #2f3948;
+
+    --nx-ink: #e9eff7;
+    --nx-ink-2: #a7b4c4;
+    --nx-ink-3: #92a2b6;   /* 4.75:1 on the raised card, 5.99:1 on the page base */
+    --nx-ink-inv: #0f141b;
+    --nx-ink-ph: #8b99ab;
+
+    --nx-accent: #4e8be8;
+    --nx-accent-light: #8fc2ff;
+    --nx-accent-deep: #2f6bd8;
+    --nx-accent-soft: #1c2a42;
+    --nx-accent-ink: #8fc2ff;
+
+    --nx-lamp-success: #2f7d4f;
+    --nx-lamp-danger: #b23a32;
+    --nx-lamp-warning: #9a6b12;
+    --nx-lamp-accent: #2f6bd8;
+    /* darker plating so white text clears 4.5:1 (the bright dark-mode accent
+       measured 3.40:1 as a plate) */
+    --nx-plate-accent: #246fe2;
+    --nx-plate-accent-deep: #1754b2;
+    --nx-plate-danger: #d8352d;
+    --nx-plate-danger-deep: #a82620;
+    --nx-danger: #e0605a;
+    --nx-danger-soft: #35211f;
+    --nx-success: #4fae7a;
+    --nx-success-soft: #16281f;
+    --nx-warning: #d4a24a;
+    --nx-warning-soft: #2b2416;
+    --nx-info: #4e8be8;
+
+    /* dark ink is BRIGHTER than the light ink — a dark room needs more light from
+       the text to read. Measured worst case across every dark surface (raised card,
+       page base, sunken well, tinted alert) is >=4.5:1. */
+    --nx-danger-ink: #ff7c74;
+    --nx-success-ink: #53b780;
+    --nx-warning-ink: #d4a24a;
+
+    /* dark surfaces catch very little light, but "very little" must still be
+       visible. Measured: at 0.11 the lit inner edge of a well was effectively
+       invisible (light mode uses 0.95), so recesses had no bottom lip. 0.16 is
+       the lowest value that reads as a lit edge without looking like a glow. */
+    --nx-light: rgba(255, 255, 255, 0.16);
+    --nx-shade: rgba(0, 0, 0, 0.82);
+    --nx-shade-strong: rgba(0, 0, 0, 0.92);
+    --nx-contact: rgba(0, 0, 0, 0.68);
+
+    --nx-raise-sm: 2px 2px 5px var(--nx-shade), -2px -2px 5px var(--nx-light);
+    --nx-raise: 5px 5px 12px var(--nx-shade), -5px -5px 12px var(--nx-light);
+    --nx-raise-lg: 9px 9px 22px var(--nx-shade), -9px -9px 22px var(--nx-light);
+    --nx-sink: inset 4px 4px 9px var(--nx-shade), inset -4px -4px 9px var(--nx-light);
+    --nx-sink-sm: inset 2px 2px 5px var(--nx-shade), inset -2px -2px 5px var(--nx-light);
+    --nx-sink-lg: inset 6px 6px 14px var(--nx-shade), inset -6px -6px 14px var(--nx-light);
+
+    /* on a dark surface a blue outer shadow reads as a neon glow, which fights the
+       whole premise; the accent key should cast a DARK shadow like everything else */
+    --nx-accent-shade: rgba(0, 0, 0, 0.55);
+
+    --nx-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    --nx-bevel-bottom: inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    --nx-rim: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+
+    --nx-mark-1: #eaf1fa;
+    --nx-mark-2: #a9bcd2;
+    --nx-mark-3: #7188a3;
+    --nx-mark-4: #46566c;
+    --nx-sparkle: #cfe3ff;
+    --nx-tile-shadow: 5px 5px 12px rgba(0, 0, 0, 0.6), -5px -5px 12px rgba(255, 255, 255, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* Respect the OS preference until the user makes an explicit choice.
+   The toggle writes data-theme="light|dark" and the boot script applies .dark. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --nx-t-fast: 1ms;
+        --nx-t: 1ms;
+        --nx-t-slow: 1ms;
+    }
+}
+
+/* ============================================================================
+   TAILWIND COLOUR CHANNELS
+   Stored as raw channels ("R G B") so Tailwind can still compose opacity
+   modifiers — `bg-red-500/75`, `text-blue-200/75` — which a plain hex var
+   cannot do. The scales below REPLACE Tailwind's defaults for these families,
+   which is what makes the entire existing panel theme itself: a component that
+   already says `bg-neutral-800` now renders a light raised surface in light
+   mode and the dark surface in dark mode, with no component edit.
+   ========================================================================= */
+:root {
+    --nx-neutral-50: 255 255 255;
+    --nx-neutral-100: 27 34 40;
+    --nx-neutral-200: 43 51 59;
+    --nx-neutral-300: 71 82 92;
+    --nx-neutral-400: 94 105 114;
+    --nx-neutral-500: 96 104 111;   /* 4.54:1 on the page base — 10px caps labels need it */
+    --nx-neutral-600: 163 171 176;
+    --nx-neutral-700: 201 207 206;
+    --nx-neutral-800: 227 231 230;
+    --nx-neutral-900: 240 243 242;
+    --nx-neutral-950: 247 249 248;
+
+    --nx-blue-50: 238 244 253;
+    --nx-blue-100: 219 231 251;
+    --nx-blue-200: 188 210 246;
+    --nx-blue-300: 147 180 239;
+    --nx-blue-400: 102 145 230;
+    --nx-blue-500: 47 107 216;
+    --nx-blue-600: 30 79 168;
+    --nx-blue-700: 23 64 127;
+    --nx-blue-800: 18 51 95;
+    --nx-blue-900: 13 38 71;
+
+    --nx-red-50: 251 240 239;
+    --nx-red-100: 246 227 225;
+    --nx-red-200: 240 202 199;
+    --nx-red-300: 226 160 156;
+    --nx-red-400: 205 112 107;
+    --nx-red-500: 178 58 50;
+    --nx-red-600: 150 44 38;
+    --nx-red-700: 122 35 30;
+    --nx-red-800: 95 27 24;
+    --nx-red-900: 70 20 18;
+
+    --nx-green-50: 235 246 240;
+    --nx-green-100: 224 240 231;
+    --nx-green-200: 195 224 208;
+    --nx-green-300: 152 199 173;
+    --nx-green-400: 100 168 130;
+    --nx-green-500: 47 125 79;
+    --nx-green-600: 38 102 64;
+    --nx-green-700: 30 80 50;
+    --nx-green-800: 23 60 38;
+    --nx-green-900: 16 42 27;
+
+    --nx-yellow-50: 251 246 235;
+    --nx-yellow-100: 247 238 218;
+    --nx-yellow-200: 240 224 184;
+    --nx-yellow-300: 228 203 138;
+    --nx-yellow-400: 210 175 85;
+    --nx-yellow-500: 154 107 18;
+    --nx-yellow-600: 128 89 15;
+    --nx-yellow-700: 101 70 12;
+    --nx-yellow-800: 75 52 9;
+    --nx-yellow-900: 52 36 6;
+
+    --nx-cyan-400: 56 152 168;
+    --nx-cyan-500: 38 130 148;
+    --nx-cyan-800: 18 64 74;
+}
+
+html.dark {
+    /* The Titanium ramp for dark mode. The previous values were the stock Tailwind
+       slate scale pasted in verbatim (800 = 30 41 59 = slate-800), which is why the
+       dark page background, body text and hairlines all fell outside the design
+       system. These are generated at the Titanium hue (217deg) with perceptual L*
+       targets, so step 800 lands exactly on --nx-base (#1d242f). */
+    --nx-neutral-50: 250 251 252;
+    --nx-neutral-100: 234 235 236;
+    --nx-neutral-200: 207 210 215;
+    --nx-neutral-300: 165 172 183;
+    --nx-neutral-400: 142 158 178;   /* 4.5:1 on the raised card, 5.6:1 on the page base */
+    --nx-neutral-500: 140 157 186;   /* 4.50:1 on the raised card, 5.68:1 on the page base */
+    --nx-neutral-600: 57 67 83;
+    --nx-neutral-700: 40 49 63;
+    --nx-neutral-800: 29 36 47;
+    --nx-neutral-900: 20 26 35;
+    --nx-neutral-950: 11 14 20;
+
+    --nx-blue-50: 22 35 58;
+    --nx-blue-100: 27 44 73;
+    --nx-blue-200: 36 64 107;
+    --nx-blue-300: 47 86 143;
+    --nx-blue-400: 63 114 187;
+    --nx-blue-500: 78 139 232;
+    --nx-blue-600: 107 162 239;
+    --nx-blue-700: 143 189 246;
+    --nx-blue-800: 182 214 250;
+    --nx-blue-900: 220 235 253;
+
+    --nx-red-50: 40 24 22;
+    --nx-red-100: 53 33 31;
+    --nx-red-200: 74 46 43;
+    --nx-red-300: 107 66 62;
+    --nx-red-400: 148 92 87;
+    --nx-red-500: 224 96 90;
+    --nx-red-600: 235 128 123;
+    --nx-red-700: 242 165 161;
+    --nx-red-800: 248 200 197;
+    --nx-red-900: 252 230 228;
+
+    --nx-green-50: 18 32 24;
+    --nx-green-100: 22 40 31;
+    --nx-green-200: 31 56 43;
+    --nx-green-300: 43 79 60;
+    --nx-green-400: 62 110 84;
+    --nx-green-500: 79 174 122;
+    --nx-green-600: 112 196 149;
+    --nx-green-700: 152 216 180;
+    --nx-green-800: 191 234 210;
+    --nx-green-900: 225 246 235;
+
+    --nx-yellow-50: 38 32 20;
+    --nx-yellow-100: 43 36 22;
+    --nx-yellow-200: 60 50 31;
+    --nx-yellow-300: 84 70 43;
+    --nx-yellow-400: 116 97 60;
+    --nx-yellow-500: 212 162 74;
+    --nx-yellow-600: 224 184 110;
+    --nx-yellow-700: 233 204 150;
+    --nx-yellow-800: 241 223 189;
+    --nx-yellow-900: 248 239 222;
+
+    --nx-cyan-400: 106 200 214;
+    --nx-cyan-500: 130 214 226;
+    --nx-cyan-800: 23 78 90;
+}
+
+/* cyan is used by the server status accents — full scale for completeness */
+:root {
+    --nx-cyan-50: 235 247 249;
+    --nx-cyan-100: 220 241 244;
+    --nx-cyan-200: 188 227 233;
+    --nx-cyan-300: 141 206 216;
+    --nx-cyan-600: 30 104 118;
+    --nx-cyan-700: 24 82 93;
+    --nx-cyan-900: 14 47 54;
+}
+html.dark {
+    --nx-cyan-50: 16 34 38;
+    --nx-cyan-100: 19 43 48;
+    --nx-cyan-200: 26 60 67;
+    --nx-cyan-300: 38 88 98;
+    --nx-cyan-600: 152 224 234;
+    --nx-cyan-700: 178 233 241;
+    --nx-cyan-900: 218 244 248;
+}
+
+/* ============================================================================
+   CONTRAST CORRECTION
+   First render pass came back washed out: the card, the wells and the page field
+   sat within a few percent of each other in luminance, so nothing read as raised
+   or recessed. Neumorphism only works when the light/shade PAIR is decisive, so
+   the shade is pushed darker, the highlight stays near-white, and the base is
+   pulled a touch darker so a raised face has somewhere to rise from.
+   ========================================================================= */
+:root {
+    --nx-base: #e2e6e5;
+    --nx-raised: #f4f6f5;
+    --nx-raised-2: #e3e7e6;
+    --nx-sunken: #d3d8d7;
+    --nx-sunken-2: #bcc3c2;
+    --nx-edge: #c2c9c8;
+
+    --nx-ink: #1c2329;
+    --nx-ink-2: #414b53;
+    --nx-ink-3: #5f686e;
+
+    --nx-shade: rgba(122, 136, 147, 0.78);
+    --nx-shade-strong: rgba(96, 110, 122, 0.9);
+    --nx-contact: rgba(96, 110, 122, 0.45);
+
+    /* a tighter, more directional light pair — light from the upper-left */
+    /* One light source, up and to the left. Each raised object therefore gets:
+       a tight contact shadow at its base (the thing that makes it sit ON the
+       page), a softer cast shadow down-right, and a lit edge up-left. */
+    --nx-raise-sm: 0 1px 2px var(--nx-contact), 1px 2px 3px var(--nx-contact), 2px 3px 7px var(--nx-shade),
+        -2px -2px 6px var(--nx-light);
+    --nx-raise: 0 1px 2px var(--nx-contact), 1px 3px 5px var(--nx-contact), 4px 6px 16px var(--nx-shade),
+        -4px -4px 12px var(--nx-light);
+    --nx-raise-lg: 0 2px 3px var(--nx-contact), 2px 4px 8px var(--nx-contact), 8px 12px 30px var(--nx-shade),
+        -7px -7px 22px var(--nx-light);
+    /* a well is the same light seen from inside: shadow cast by the near lip
+       (top-left), light caught on the far wall (bottom-right) */
+    --nx-sink: inset 0 2px 4px rgba(0, 0, 0, 0.14), inset 3px 4px 9px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -3px -3px 7px var(--nx-light);
+    --nx-sink-sm: inset 0 1px 3px rgba(0, 0, 0, 0.14), inset 2px 3px 5px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -2px -2px 4px var(--nx-light);
+    --nx-sink-lg: inset 0 3px 6px rgba(0, 0, 0, 0.18), inset 5px 7px 15px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -5px -5px 11px var(--nx-light);
+}
+
+html.dark {
+    --nx-base: #1d242f;
+    --nx-raised: #2c3544;
+    --nx-raised-2: #1e2531;
+    --nx-sunken: #12171f;
+    --nx-sunken-2: #070a0f;
+    --nx-edge: #2f3948;
+
+    --nx-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --nx-bevel-bottom: inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+    --nx-rim: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --nx-key: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 0 rgba(0, 0, 0, 0.85);
+
+    /* A bare control on a dark card has the SAME material as the card, so it
+       vanishes (this was the main reason dark mode read as "flat"). Controls get
+       a lighter face and a brighter rim than the card edge. */
+    --nx-control: #3b475a;
+    --nx-control-2: #2c3544;
+    --nx-control-edge: #414d61;
+
+    --nx-shade: rgba(0, 0, 0, 0.72);
+    --nx-shade-strong: rgba(0, 0, 0, 0.85);
+
+    --nx-raise-sm: 0 1px 2px var(--nx-contact), 1px 2px 3px var(--nx-contact), 2px 3px 8px var(--nx-shade),
+        -2px -2px 6px var(--nx-light);
+    --nx-raise: 0 1px 2px var(--nx-contact), 1px 3px 6px var(--nx-contact), 4px 8px 22px rgba(0, 0, 0, 0.9),
+        -4px -4px 12px var(--nx-light);
+    --nx-raise-lg: 0 2px 3px var(--nx-contact), 2px 5px 11px var(--nx-contact), 10px 18px 44px rgba(0, 0, 0, 0.92),
+        -7px -7px 24px var(--nx-light);
+    --nx-sink: inset 0 2px 5px rgba(0, 0, 0, 0.5), inset 3px 4px 10px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -3px -3px 8px var(--nx-light);
+    --nx-sink-sm: inset 0 1px 4px rgba(0, 0, 0, 0.5), inset 2px 3px 6px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -2px -2px 5px var(--nx-light);
+    --nx-sink-lg: inset 0 3px 7px rgba(0, 0, 0, 0.55), inset 5px 8px 17px var(--nx-shade-strong),
+        inset 0 -1px 0 var(--nx-light), inset -5px -5px 12px var(--nx-light);
+}
+
+/* ============================================================================
+   GLASS LAYER
+   ----------------------------------------------------------------------------
+   Glassmorphism sits ON TOP of the neumorphic structure, it does not replace it:
+   a floating element (modal, navbar, overlay) gets a translucent panel with a
+   backdrop blur, while the surfaces underneath keep their raised/sunken physics.
+   Using glass everywhere would dissolve the physical depth; using it only for
+   things that genuinely float above the page is what makes it read as real.
+   ========================================================================= */
+:root {
+    --nx-glass-bg: rgba(255, 255, 255, 0.55);
+    --nx-glass-bg-strong: rgba(255, 255, 255, 0.78);
+    --nx-glass-border: rgba(255, 255, 255, 0.75);
+    --nx-glass-sheen: rgba(255, 255, 255, 0.5);
+    --nx-glass-shadow: 0 10px 34px rgba(120, 133, 143, 0.30), 0 2px 8px rgba(120, 133, 143, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --nx-glass-blur: 16px;
+    --nx-mask: rgba(28, 36, 46, 0.40);
+}
+
+html.dark {
+    --nx-glass-bg: rgba(32, 40, 54, 0.60);
+    --nx-glass-bg-strong: rgba(28, 35, 47, 0.82);
+    --nx-glass-border: rgba(255, 255, 255, 0.09);
+    --nx-glass-sheen: rgba(255, 255, 255, 0.06);
+    --nx-glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --nx-mask: rgba(5, 9, 14, 0.62);
+}
+
+/* ============================================================================
+   CONSOLE SURFACE
+   A terminal is a dark object in both themes — that is the skeuomorphic truth of
+   it (a screen set into a panel). It keeps a fixed dark face in light mode too,
+   so the console still reads as "the machine" rather than becoming a white box.
+   ========================================================================= */
+:root {
+    --nx-console-bg: #0f141c;
+    --nx-console-bg-2: #0a0e15;
+    --nx-console-ink: #d8e4f3;
+    --nx-console-dim: #9aabc2;
+    --nx-console-glow: rgba(47, 107, 216, 0.16);
+
+    /* ---- chart readout --------------------------------------------------
+       The GRAPHS are NOT the terminal. A terminal is a dark object in both
+       themes, but a CPU/RAM graph is a READOUT on the panel — it sits directly
+       above the CPU/RAM stat tiles and must obey the same physics as they do.
+       Previously the well was painted `--nx-console-bg` (#0f141c) in BOTH
+       themes, so light mode showed a light card with a black hole punched in
+       it, and the series colours (defined only in `:root`, tuned for a dark
+       face) were wrong for a light recess.
+
+       So the chart now follows the theme, like every other well. Values below
+       are measured against the LIGHT recessed face (`--nx-sunken` #d3d8d7);
+       every series clears 3:1 (WCAG 1.4.11 for graphics), tick labels clear
+       4.5:1 (they are 10px text).
+
+       These are channel triplets because a <canvas> has no cascade — they are
+       read by lib/theme-colors.ts. */
+    --nx-chart-ink: 65 75 83; /* tick labels  6.19:1 on the light well */
+    --nx-chart-grid: 185 194 193; /* graticule: a faint groove, not a wire */
+    --nx-chart-trace: 143 155 154; /* the "no data" flatline */
+    --nx-chart-cpu: 26 99 196; /* 4.02:1 */
+    --nx-chart-memory: 109 75 192; /* 4.26:1 */
+    --nx-chart-in: 9 104 126; /* 4.43:1 */
+    --nx-chart-out: 124 82 3; /* 4.75:1 */
+}
+
+html.dark {
+    --nx-console-bg: #0a0e15;
+    --nx-console-bg-2: #070a10;
+    --nx-console-ink: #d8e4f3;
+    --nx-console-dim: #8ea2ba;
+    --nx-console-glow: rgba(78, 139, 232, 0.18);
+
+    /* the same readout, on the DARK recessed face (`--nx-sunken` #12171f).
+       Dark needs brighter, more saturated series values: a colour that reads
+       well on a light recess is mud on a near-black one. */
+    --nx-chart-ink: 146 162 182; /* 6.91:1 */
+    --nx-chart-grid: 30 40 54;
+    --nx-chart-trace: 70 90 116;
+    --nx-chart-cpu: 79 157 255; /* 6.51:1 */
+    --nx-chart-memory: 167 139 250; /* 6.61:1 */
+    --nx-chart-in: 56 189 248; /* 8.39:1 */
+    --nx-chart-out: 251 191 36; /* 10.77:1 */
+}

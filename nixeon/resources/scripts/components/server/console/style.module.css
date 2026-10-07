@@ -1,0 +1,219 @@
+.stat_block {
+    @apply flex items-center rounded relative;
+    @apply col-span-3 md:col-span-2 lg:col-span-6;
+    @apply px-3 py-2 md:p-3 lg:p-4;
+
+    /* a stat tile is a raised plate like every other card */
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top), 0 0 0 1px var(--nx-edge);
+    color: var(--nx-ink);
+
+    & > .status_bar {
+        @apply w-1 h-full absolute left-0 top-0 rounded-l sm:hidden;
+    }
+
+    & > .icon {
+        @apply hidden flex-shrink-0 items-center justify-center rounded-lg w-12 h-12;
+        @apply transition-colors duration-500;
+        @apply sm:flex sm:mr-4;
+
+        /* the icon sits in its own milled socket, matching the dashboard rows */
+        background: var(--nx-sunken);
+        box-shadow: var(--nx-sink-sm);
+        color: var(--nx-accent);
+
+        & > svg {
+            @apply w-6 h-6 m-auto;
+        }
+    }
+}
+
+/* ----------------------------------------------------------------------------
+   CONSOLE — a machined instrument, not a text box.
+
+   The old console was a rounded rectangle with a terminal inside it: the same
+   shape as every other panel, so it read as "a div that happens to contain
+   xterm". A real console on a rack has a BEZEL: a raised frame with a recessed
+   screen set into it, a screw-fixed nameplate strip, and a status lamp. That is
+   what this builds.
+
+   Structure:
+     .bezel    — the raised frame, carries the nameplate + lamp
+     .screen   — the recessed well the terminal sits in (kept dark in both themes)
+     .command  — the input line, lit along its top edge like an illuminated strip
+   ---------------------------------------------------------------------------- */
+
+.terminal {
+    @apply flex flex-col w-full;
+    position: relative;
+}
+
+/* the frame around the screen */
+.bezel {
+    @apply rounded-lg overflow-hidden;
+    position: relative;
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top), 0 0 0 1px var(--nx-edge);
+    padding: 0.5rem;
+}
+
+/* the nameplate strip across the top of the bezel */
+.nameplate {
+    @apply flex items-center gap-3 px-1 pb-2;
+
+    & > .lamp {
+        @apply relative flex-none rounded-full;
+        width: 9px;
+        height: 9px;
+        /* a status LED set into the plate: dark socket, lit top lip, faint spill */
+        background: radial-gradient(circle at 35% 30%, #fff 0%, var(--lamp, var(--nx-accent)) 42%, color-mix(in srgb, var(--lamp, var(--nx-accent)) 70%, #000) 100%);
+        box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--nx-sunken-2),
+            0 0 4px color-mix(in srgb, var(--lamp, var(--nx-accent)) 60%, transparent);
+    }
+
+    & > .plate {
+        @apply flex-1 min-w-0 truncate;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--nx-ink-3);
+        /* the label is stamped INTO the plate, not printed on it */
+        text-shadow: 0 1px 0 var(--nx-light);
+    }
+
+    & > .controls {
+        @apply flex items-center gap-1 flex-none;
+        color: var(--nx-ink-3);
+    }
+}
+
+/* the recessed well the terminal lives in */
+.screen {
+    @apply rounded relative overflow-hidden;
+    /* a screen keeps a dark face in BOTH themes — it is the machine, not a page */
+    background:
+        radial-gradient(120% 60% at 50% 0%, var(--nx-console-glow) 0%, transparent 62%),
+        linear-gradient(180deg, var(--nx-console-bg), var(--nx-console-bg-2));
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 2px 10px rgba(0, 0, 0, 0.75),
+        0 1px 0 var(--nx-light);
+
+    & #terminal {
+        @apply h-full p-2 text-sm;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-variant-ligatures: none;
+
+        &::-webkit-scrollbar-track {
+            @apply w-2;
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+        }
+    }
+}
+
+/* the lit command strip under the screen */
+.command_input {
+    @apply relative w-full text-sm;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-ligatures: none;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    @apply focus:ring-0 outline-none focus-visible:outline-none;
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--nx-console-ink);
+    /* a hard lit line along the TOP edge: the strip is illuminated from above */
+    box-shadow: inset 0 2px 0 -1px color-mix(in srgb, var(--nx-accent) 55%, transparent),
+        inset 0 8px 12px -8px rgba(0, 0, 0, 0.9);
+    border-radius: 0 0 var(--nx-radius) var(--nx-radius);
+    transition: box-shadow var(--nx-t-fast) linear;
+
+    &::placeholder {
+        color: var(--nx-console-dim);
+    }
+
+    &:disabled {
+        opacity: 0.55;
+    }
+
+    &:active,
+    &:focus {
+        /* the strip brightens along its top edge when it takes focus */
+        box-shadow: inset 0 2px 0 -1px var(--nx-accent), inset 0 10px 14px -8px rgba(0, 0, 0, 0.95),
+            0 0 0 1px color-mix(in srgb, var(--nx-accent) 40%, transparent);
+    }
+}
+
+.command_icon {
+    @apply flex items-center top-0 left-0 absolute z-10 select-none h-full px-3;
+    color: var(--nx-console-dim);
+    transition: color var(--nx-t-fast) linear;
+}
+
+/* ----------------------------------------------------------------------------
+   CHART — a gauge card.
+
+   The chart sits in a sunken well inside a raised card, so it reads as a dial
+   let into an instrument face rather than a rectangle with a canvas in it.
+   ---------------------------------------------------------------------------- */
+
+.chart_container {
+    @apply rounded relative overflow-hidden;
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top), 0 0 0 1px var(--nx-edge);
+}
+
+/* the title strip, with a hairline groove under it */
+.chart_title {
+    @apply flex items-center justify-between px-4 py-2 relative;
+    box-shadow: inset 0 -1px 0 var(--nx-edge), inset 0 -2px 0 var(--nx-light);
+}
+
+/* the well the canvas is drawn in — a RECESSED face that follows the theme, like
+   every other well on the panel. It used to be painted `--nx-console-bg` in BOTH
+   themes, which punched a black hole into the middle of a light card in light
+   mode. A graph is a readout, not a terminal: the console below it stays dark,
+   but the chart must obey the same physics as the CPU/RAM tiles above it.
+
+   It reuses the `.nx-well` recipe (gradient floor + `--nx-sink` + lip) rather than
+   a hand-rolled shadow, so the depth is byte-for-byte the same recess as every
+   other well on the panel. */
+.chart_well {
+    @apply relative;
+    margin: 0 0.5rem 0.5rem;
+    border-radius: var(--nx-radius-sm);
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    box-shadow: var(--nx-sink-sm), inset 0 2px 3px rgba(0, 0, 0, 0.16), inset 0 -1px 0 var(--nx-light),
+        inset 0 0 0 1px var(--nx-edge);
+    padding: 0.4rem 0.25rem 0.2rem;
+    overflow: hidden;
+
+    & canvas {
+        /* the canvas is the dial face — keep it off the card's own bevel */
+        display: block;
+        width: 100% !important;
+    }
+}
+
+/* the legend chip: a small stamped token, colour carried by a dot */
+.legend_item {
+    @apply inline-flex items-center gap-1.5;
+    font-family: 'Karla', system-ui, sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nx-ink-3);
+
+    & > .legend_dot {
+        @apply flex-none rounded-full;
+        width: 8px;
+        height: 8px;
+        background: var(--dot, var(--nx-accent));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 1px rgba(0, 0, 0, 0.35),
+            0 0 0 1px var(--nx-sunken-2);
+    }
+}

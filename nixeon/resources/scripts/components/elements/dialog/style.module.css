@@ -1,0 +1,55 @@
+.container {
+    @apply flex min-h-full items-center justify-center p-4 text-center;
+}
+
+/* A dialog floats above the page, so it is the canonical glass surface: blurred
+   backdrop, translucent panel, hard 1px light border and a top sheen. */
+.panel {
+    @apply relative rounded-lg max-w-xl w-full mx-auto text-left;
+    background: var(--nx-glass-bg-strong);
+    -webkit-backdrop-filter: blur(calc(var(--nx-glass-blur) * 1.4)) saturate(1.5);
+    backdrop-filter: blur(calc(var(--nx-glass-blur) * 1.4)) saturate(1.5);
+    border: 1px solid var(--nx-glass-border);
+    box-shadow: var(--nx-glass-shadow), var(--nx-raise-lg);
+    color: var(--nx-ink);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .panel {
+        background: var(--nx-raised);
+    }
+}
+
+.title {
+    @apply font-header text-xl font-medium mb-2 pr-4;
+    color: var(--nx-ink);
+}
+
+.close_icon {
+    @apply w-5 h-5 group-hover:rotate-90 transition-transform duration-100;
+}
+
+.dialog_icon {
+    @apply flex items-center justify-center w-10 h-10 rounded-full mr-4;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+
+    &.danger {
+        background: var(--nx-plate-danger);
+        color: #fff;
+    }
+
+    &.warning {
+        background: var(--nx-plate-warning);
+        color: #fff;
+    }
+
+    &.success {
+        background: var(--nx-plate-success);
+        color: #fff;
+    }
+
+    &.info {
+        background: var(--nx-accent);
+        color: #fff;
+    }
+}

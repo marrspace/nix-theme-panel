@@ -1,0 +1,74 @@
+.menu {
+  @apply relative inline-block text-left;
+
+  & .button {
+    @apply inline-flex justify-center items-center w-full py-2 rounded-md;
+    @apply transition-all duration-100;
+    color: var(--nx-ink);
+
+    &:hover, &[aria-expanded="true"] {
+      background: var(--nx-sunken);
+      color: var(--nx-ink);
+    }
+
+    &:focus, &:focus-within, &:active {
+      box-shadow: 0 0 0 2px var(--nx-accent);
+      color: var(--nx-ink);
+    }
+
+    & svg {
+      @apply w-5 h-5 transition-transform duration-75;
+    }
+
+    &[aria-expanded="true"] svg[data-animated="true"] {
+      @apply rotate-180;
+    }
+  }
+
+  /* A dropdown is a floating menu — glass, with a raised lip so it separates from
+     whatever it overlaps. */
+  & .items_container {
+    @apply absolute right-0 mt-2 origin-top-right rounded-lg z-10 overflow-hidden;
+    background: var(--nx-glass-bg-strong);
+    -webkit-backdrop-filter: blur(var(--nx-glass-blur)) saturate(1.4);
+    backdrop-filter: blur(var(--nx-glass-blur)) saturate(1.4);
+    border: 1px solid var(--nx-glass-border);
+    box-shadow: var(--nx-glass-shadow), var(--nx-raise);
+    color: var(--nx-ink);
+  }
+}
+
+.menu_item {
+  @apply flex items-center rounded w-full px-2 py-2;
+  color: var(--nx-ink-2);
+  transition: background var(--nx-t-fast) linear, color var(--nx-t-fast) linear;
+
+  & svg {
+    @apply w-4 h-4 mr-4;
+    color: var(--nx-ink-3);
+  }
+
+  &:hover, &:focus {
+    background: var(--nx-plate-accent);
+    color: #fff;
+
+    & svg {
+      color: #fff;
+    }
+  }
+
+  &.danger {
+    &:hover, &:focus {
+      background: var(--nx-plate-danger);
+      color: #fff;
+
+      & svg {
+        color: #fff;
+      }
+    }
+  }
+
+  &.disabled {
+    @apply cursor-not-allowed opacity-30;
+  }
+}

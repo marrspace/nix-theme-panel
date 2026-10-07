@@ -1,0 +1,806 @@
+/* Wrapped in @layer components so Tailwind emits these AFTER base and BEFORE
+   utilities — that ordering lets a utility class override a primitive. */
+@layer components {
+
+/* ============================================================================
+   NIXEON 408 — COMPONENT PRIMITIVES
+   The skeuomorphic layer. Every control here has three physical cues:
+     1. a RAISED or SUNKEN face (stacked shadows, light from upper-left)
+     2. a CHAMFER — bright top lip + dark bottom lip, like a milled edge
+     3. a PRESS state that actually moves the object (translate + shadow swap)
+   Neumorphism alone is soft and flat; the chamfer and the travel are what make
+   it read as a real object rather than a blurred rectangle.
+   ========================================================================= */
+
+/* ------------------------------------------------------------------ surface */
+.nx-surface {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top),
+        inset 0 0 0 1px var(--nx-edge);
+    border-radius: var(--nx-radius);
+    color: var(--nx-ink);
+}
+
+.nx-card {
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    /* 1px rim keeps the edge defined when a shadow has nothing dark to fall on
+       (dark theme), and the bevel gives the top lip a real chamfer */
+    /* the 1px hard line at the base is the occlusion line — the cue that says the
+       card is TOUCHING the page. Blurred shadows alone read as hovering. */
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise-lg), var(--nx-bevel-top),
+        inset 0 0 0 1px var(--nx-edge);
+    border-radius: var(--nx-radius-lg);
+    color: var(--nx-ink);
+    position: relative;
+}
+
+/* --------------------------------------------------------------------- well */
+/* A well needs a crisp top lip shadow and a bottom highlight, otherwise it reads
+   as a flat grey pill rather than a milled slot. */
+.nx-well {
+    /* the floor is a gradient: darker where the lip shadows it, lighter where it
+       catches light. A flat fill + a ring reads as a sticker, not a recess. */
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    box-shadow: var(--nx-sink), inset 0 2px 3px rgba(0, 0, 0, 0.22), inset 0 -1px 0 var(--nx-light),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    border-radius: var(--nx-radius);
+    color: var(--nx-ink);
+}
+
+/* a deeper variant for the primary content wells (editor body, cron readouts) */
+.nx-well-deep {
+    background: linear-gradient(180deg, var(--nx-sunken-2), var(--nx-sunken));
+    box-shadow: var(--nx-sink-lg), inset 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 -1px 0 var(--nx-light);
+    border-radius: var(--nx-radius);
+    color: var(--nx-ink);
+}
+
+/* ------------------------------------------------------------------- button */
+.nx-btn {
+    --_rest: var(--nx-raise-sm);
+    font-family: 'Karla', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+    color: var(--nx-ink);
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    border: 0;
+    border-radius: var(--nx-radius);
+    padding: 0.62rem 1.15rem;
+    min-height: var(--nx-tap);
+    cursor: pointer;
+    box-shadow: var(--_rest), var(--nx-bevel-top), var(--nx-bevel-bottom);
+    transition: box-shadow var(--nx-t-fast) var(--nx-ease-press),
+        transform var(--nx-t-fast) var(--nx-ease-press), background var(--nx-t-fast) linear;
+}
+
+/* the press: the object sinks and travels 1px toward the light source */
+.nx-btn:active:not(:disabled) {
+    box-shadow: var(--nx-sink-sm), inset 0 1px 2px rgba(0, 0, 0, 0.12);
+    transform: translateY(1px);
+}
+
+.nx-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    box-shadow: var(--nx-sink-sm);
+}
+
+/* accent = a plated metal cap: saturated face, bright chamfer, deep under-edge */
+.nx-btn-accent {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-accent), var(--nx-accent-deep));
+    box-shadow: 3px 3px 9px var(--nx-accent-shade), -3px -3px 9px var(--nx-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 -2px 5px rgba(0, 0, 0, 0.26);
+}
+
+.nx-btn-accent:active:not(:disabled) {
+    box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.34), inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+    transform: translateY(1px);
+}
+
+.nx-btn-danger {
+    color: #fff;
+    background: linear-gradient(180deg, var(--nx-plate-danger), var(--nx-plate-danger-deep));
+    box-shadow: 3px 3px 9px color-mix(in srgb, var(--nx-plate-danger) 34%, transparent), -3px -3px 9px var(--nx-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -2px 5px rgba(0, 0, 0, 0.24);
+}
+
+/* -------------------------------------------------------------------- chip */
+.nx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nx-ink-2);
+    background: var(--nx-base);
+    border-radius: 999px;
+    padding: 0.28rem 0.62rem;
+    box-shadow: var(--nx-sink-sm);
+}
+
+.nx-chip-accent {
+    color: var(--nx-accent-ink);
+}
+
+.nx-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--nx-accent);
+    /* a status dot is a real LED, so a little halo is honest — but at 7px the old
+       7px glow made it a light source. Tighten it to a hint of spill. */
+    box-shadow: 0 0 3px color-mix(in srgb, var(--nx-accent) 70%, transparent);
+    flex: none;
+}
+
+.nx-dot-live {
+    background: var(--nx-success);
+    box-shadow: 0 0 3px color-mix(in srgb, var(--nx-success) 70%, transparent);
+}
+
+/* -------------------------------------------------------------------- bar */
+.nx-bar {
+    height: 9px;
+    border-radius: 999px;
+    background: var(--nx-sunken);
+    box-shadow: var(--nx-sink-sm);
+    overflow: hidden;
+}
+
+.nx-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--nx-accent), var(--nx-accent-deep));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    transition: width var(--nx-t-slow) var(--nx-ease-press);
+}
+
+/* ------------------------------------------------------------ focus / a11y */
+/*
+ * `[tabindex]` matches ANY tabindex attribute, and CodeMirror deliberately parks
+ * `tabindex="-1"` on its scroller and scrollbars so they can be focused
+ * programmatically but never reached by Tab. Those are not interactive controls,
+ * so giving them a focus ring drew a 5px blue outline around the whole code area
+ * — the "blue line" that kept reappearing in the editor. Only elements the user
+ * can actually Tab to should show a ring, so `-1` is excluded explicitly.
+ */
+:where(a, button, input, select, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--nx-base), 0 0 0 5px var(--nx-accent);
+    border-radius: var(--nx-radius-sm);
+}
+
+/*
+ * Textareas are excluded from the ring above on purpose. CodeMirror keeps an
+ * invisible 1000x12px textarea parked inside the editor to receive keystrokes;
+ * a 5px focus ring around it drew a stray blue line across the middle of the
+ * code editor (it sits at the caret position). The editor is already visibly
+ * focused through its own caret, so the ring is not needed here.
+ */
+textarea:focus-visible {
+    outline: none;
+}
+
+/* CodeMirror's internal surfaces must never take the global ring or outline:
+   they are focus plumbing, not controls. Belt-and-braces alongside the
+   `:not([tabindex='-1'])` guard above. */
+.CodeMirror,
+.CodeMirror *,
+.CodeMirror-scroll,
+.CodeMirror-sizer,
+.CodeMirror-gutters,
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar {
+    outline: none !important;
+}
+
+.CodeMirror-focused,
+.CodeMirror-focused * {
+    box-shadow: none;
+}
+
+/* selection reads as a tinted wash rather than a hard browser blue */
+::selection {
+    background: var(--nx-accent-soft);
+    color: var(--nx-ink);
+}
+
+/* ------------------------------------------------------------- scrollbars */
+::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+    background: none;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 4px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+    background-color: var(--nx-shade-strong);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--nx-ink-3);
+}
+
+::-webkit-scrollbar-track-piece {
+    margin: 4px 0;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ------------------------------------------------------------------ helper */
+.nx-tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+.nx-console {
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-ligatures: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nx-btn,
+    .nx-bar > span {
+        transition-duration: 1ms;
+    }
+}
+
+}
+
+/* ============================================================================
+   reCAPTCHA badge
+   Google pins the badge to the exact bottom-right corner, where a short viewport
+   clips it. Pulling it in by a few pixels keeps it fully visible and clear of the
+   content without hiding the required branding.
+   ========================================================================= */
+.grecaptcha-badge {
+    bottom: 14px !important;
+    right: 14px !important;
+    box-shadow: var(--nx-raise-sm) !important;
+    border-radius: var(--nx-radius-sm) !important;
+}
+
+/* ============================================================================
+   GLASS PRIMITIVES
+   Only for elements that genuinely float above the page. Each one keeps a hard
+   1px light border and an inner top sheen, which is what stops glass from
+   reading as a flat translucent rectangle.
+   ========================================================================= */
+.nx-glass {
+    background: var(--nx-glass-bg);
+    -webkit-backdrop-filter: blur(var(--nx-glass-blur)) saturate(1.4);
+    backdrop-filter: blur(var(--nx-glass-blur)) saturate(1.4);
+    border: 1px solid var(--nx-glass-border);
+    box-shadow: var(--nx-glass-shadow);
+    color: var(--nx-ink);
+}
+
+.nx-glass-strong {
+    background: var(--nx-glass-bg-strong);
+    -webkit-backdrop-filter: blur(calc(var(--nx-glass-blur) * 1.4)) saturate(1.5);
+    backdrop-filter: blur(calc(var(--nx-glass-blur) * 1.4)) saturate(1.5);
+    border: 1px solid var(--nx-glass-border);
+    box-shadow: var(--nx-glass-shadow);
+    color: var(--nx-ink);
+}
+
+/* falls back to a solid surface where backdrop-filter is unsupported */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .nx-glass,
+    .nx-glass-strong {
+        background: var(--nx-raised);
+    }
+}
+
+.nx-mask {
+    background: var(--nx-mask);
+    -webkit-backdrop-filter: blur(4px) saturate(1.1);
+    backdrop-filter: blur(4px) saturate(1.1);
+}
+
+/* ============================================================================
+   TERMINAL
+   The console is a glass-fronted screen set into the panel: a dark face with a
+   faint inner glow at the top edge (the CRT sheen) and a chamfered bezel.
+   ========================================================================= */
+.nx-terminal {
+    position: relative;
+    border-radius: var(--nx-radius-lg);
+    overflow: hidden;
+    background:
+        radial-gradient(120% 60% at 50% 0%, var(--nx-console-glow) 0%, transparent 62%),
+        linear-gradient(180deg, var(--nx-console-bg), var(--nx-console-bg-2));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 2px 10px rgba(0, 0, 0, 0.65),
+        0 8px 22px rgba(0, 0, 0, 0.28);
+    color: var(--nx-console-ink);
+}
+
+.nx-terminal .xterm,
+.nx-terminal .xterm-viewport {
+    background: transparent !important;
+}
+
+.nx-terminal ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.18);
+    box-shadow: none;
+}
+
+/* ============================================================================
+   TYPOGRAPHY — physical refinements
+   Display headings get a subtle engraved edge so they read as stamped into the
+   surface rather than printed on it. Kept extremely light: a heavy emboss is the
+   fastest way to make a UI look dated.
+   ========================================================================= */
+.nx-engraved {
+    text-shadow: 0 1px 0 var(--nx-light);
+}
+
+html.dark .nx-engraved {
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Section captions: small, wide-tracked, in the body face.
+   `p.nx-caption` (not `.nx-caption`) so it beats the `.nx-card p { color: inherit }`
+   rule above — a class selector alone loses to that element+class pair, which was
+   silently turning every caption the same colour as body copy. */
+.nx-caption,
+p.nx-caption,
+span.nx-caption {
+    font-family: 'Karla', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nx-ink-3);
+}
+
+/* numeric readouts align in columns */
+.nx-readout {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--nx-ink);
+}
+
+/* console/log text — the ONLY place mono is a semantic requirement */
+.nx-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-ligatures: none;
+}
+
+
+/* console ink utilities — used where a class (not a CSS module) drives the colour
+   of an element that sits on the always-dark terminal face */
+.nx-console-dim {
+    color: var(--nx-console-dim);
+}
+.nx-console-ink {
+    color: var(--nx-console-ink);
+}
+
+
+/* ============================================================================
+   EDITOR PANEL
+   The file editor is one object, not a loose textarea with controls floating
+   under it. Toolbar on top (which file, which syntax), a recessed screen in the
+   middle, and a status bar at the bottom holding the commit action. Height is
+   mobile-first: on a phone it takes the space that is actually available after
+   the chrome, and it never collapses to a few lines.
+   ========================================================================= */
+.nx-editor-panel {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--nx-radius-lg);
+    overflow: hidden;
+    /* the SAME construction as the console: a raised bezel with a recessed screen
+       set into it. The editor and the console are two instruments on the same
+       rack, so they must be built from one material language. */
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-contact), var(--nx-raise), var(--nx-bevel-top), 0 0 0 1px var(--nx-edge);
+    padding: 0.5rem;
+    /* dvh so the browser's URL bar collapsing does not clip the panel */
+    height: min(70vh, calc(100dvh - 17rem));
+    min-height: 20rem;
+}
+
+/* the nameplate strip: stamped label + a lamp, exactly like the console bezel */
+.nx-editor-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.15rem 0.25rem 0.6rem;
+    flex-wrap: wrap;
+}
+
+.nx-editor-file {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 1 1 auto;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nx-ink-3);
+}
+
+.nx-editor-file > svg {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    color: var(--nx-accent-ink);
+}
+
+/* the same status lamp as the console bezel, so both instruments read alike */
+.nx-editor-lamp {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 35% 30%,
+        #fff 0%,
+        var(--lamp, var(--nx-accent)) 42%,
+        color-mix(in srgb, var(--lamp, var(--nx-accent)) 70%, #000) 100%
+    );
+    box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--nx-sunken-2),
+        0 0 4px color-mix(in srgb, var(--lamp, var(--nx-accent)) 60%, transparent);
+}
+
+.nx-editor-file > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--nx-ink);
+}
+
+/* an unnamed file is not a filename yet — say so, and look like a placeholder */
+.nx-editor-file > span.is-placeholder {
+    color: var(--nx-ink-3);
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.01em;
+}
+
+/* the syntax picker rides in the toolbar, sized to its content and pushed to the
+   trailing edge so it lines up with the editor below it */
+.nx-editor-bar select {
+    margin-left: auto;
+    width: auto;
+    min-width: 9rem;
+    max-width: 100%;
+    flex: 0 0 auto;
+    padding: 0.4rem 2rem 0.4rem 0.65rem;
+    font-size: 0.8rem;
+}
+
+/* CodeMirror's ayu-mirage theme dims the gutter to near-invisible (#3d424d at 39%
+   alpha — about 1.3:1). The theme rule is `.cm-s-ayu-mirage .CodeMirror-linenumber`
+   (two classes), so this must match that specificity to win, not just one class. */
+.nx-editor-panel .cm-s-ayu-mirage .CodeMirror-linenumber,
+.nx-editor-panel .CodeMirror-linenumber {
+    color: #93a7c4;
+}
+
+.nx-editor-panel .cm-s-ayu-mirage .CodeMirror-gutters,
+.nx-editor-panel .CodeMirror-gutters {
+    background: transparent;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* the recessed screen the code sits in — dark in BOTH themes, like the console */
+.nx-editor-body {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0; /* lets the flex child actually shrink and scroll */
+    border-radius: var(--nx-radius);
+    overflow: hidden;
+    background:
+        radial-gradient(120% 50% at 50% 0%, var(--nx-console-glow) 0%, transparent 60%),
+        linear-gradient(180deg, var(--nx-console-bg), var(--nx-console-bg-2));
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 2px 10px rgba(0, 0, 0, 0.7),
+        0 1px 0 var(--nx-light);
+    padding: 0.375rem;
+}
+
+.nx-editor-body .CodeMirror {
+    height: 100%;
+    background: transparent;
+}
+
+/* the status bar is the lit strip under the screen, mirroring the command input */
+.nx-editor-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 0.5rem 0.1rem;
+    flex-wrap: wrap;
+}
+
+.nx-editor-status > .nx-editor-hint {
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nx-ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+    .nx-editor-status {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .nx-editor-status > .nx-editor-hint {
+        text-align: center;
+    }
+}
+
+/* the editor's empty-state hint, on the dark screen face */
+.nx-editor-panel .CodeMirror-placeholder {
+    color: #6f8199 !important;
+    font-style: italic;
+}
+
+/* ============================================================================
+   THEME TRANSITION ("meluruh")
+   ----------------------------------------------------------------------------
+   Only <body> had a transition, so on a theme switch every card, button, input
+   and border snapped instantly while the page behind them faded — the interface
+   came apart for a frame. A theme change is one physical event (the lights going
+   up or down), so everything must move together.
+
+   It is gated behind a class that is added only for the duration of the switch:
+   a permanent transition on every element would also smear hover and press
+   feedback, which is exactly the sluggishness this design is trying to avoid.
+   ========================================================================= */
+html.nx-theming,
+html.nx-theming *,
+html.nx-theming *::before,
+html.nx-theming *::after {
+    transition:
+        background-color var(--nx-t) linear,
+        background-image var(--nx-t) linear,
+        border-color var(--nx-t) linear,
+        color var(--nx-t) linear,
+        fill var(--nx-t) linear,
+        stroke var(--nx-t) linear,
+        box-shadow var(--nx-t) linear,
+        text-shadow var(--nx-t) linear !important;
+}
+
+/* the switch itself is instant for anyone who asked for less motion */
+@media (prefers-reduced-motion: reduce) {
+    html.nx-theming,
+    html.nx-theming *,
+    html.nx-theming *::before,
+    html.nx-theming *::after {
+        transition: none !important;
+    }
+}
+
+/* ------------------------------------------------------------------ divider */
+/* A divider is a groove, not a line: a 1px dark edge with a lit edge under it.
+   A flat 2D hairline in the middle of an otherwise physical card is the single
+   most obvious tell that a surface was never actually designed. */
+.nx-divider {
+    height: 0;
+    border: 0;
+    border-top: 1px solid var(--nx-edge);
+    box-shadow: 0 1px 0 var(--nx-light);
+    opacity: 0.9;
+}
+
+/* ============================================================================
+   MICRO-ANIMATION SYSTEM
+   ----------------------------------------------------------------------------
+   The panel's motion language follows one rule: an object ARRIVES and SETTLES,
+   it does not fade in. A card drops a few pixels and lands with a small
+   overshoot (the same bezier as a physical key release); it never scales up from
+   nothing, which is the stock "material fade" every generated UI ships with.
+
+   All of it is opt-in via a class, never applied to a bare element, so hover and
+   press feedback stay instant. Everything collapses under
+   `prefers-reduced-motion: reduce` — the preference is a correctness requirement,
+   not a nicety.
+   ========================================================================= */
+
+@keyframes nx-settle {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    62% {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* a panel/row landing on the page */
+.nx-enter {
+    animation: nx-settle var(--nx-t-slow) var(--nx-ease-settle) both;
+}
+
+/* a list that lands item by item. Set `--i` on each child (inline style), or let
+   the rule below do it for the first twelve children automatically. */
+.nx-stagger > * {
+    animation: nx-settle var(--nx-t-slow) var(--nx-ease-settle) both;
+    animation-delay: calc(var(--i, 0) * 34ms);
+}
+
+.nx-stagger > *:nth-child(1) { --i: 0; }
+.nx-stagger > *:nth-child(2) { --i: 1; }
+.nx-stagger > *:nth-child(3) { --i: 2; }
+.nx-stagger > *:nth-child(4) { --i: 3; }
+.nx-stagger > *:nth-child(5) { --i: 4; }
+.nx-stagger > *:nth-child(6) { --i: 5; }
+.nx-stagger > *:nth-child(7) { --i: 6; }
+.nx-stagger > *:nth-child(8) { --i: 7; }
+.nx-stagger > *:nth-child(9) { --i: 8; }
+.nx-stagger > *:nth-child(10) { --i: 9; }
+.nx-stagger > *:nth-child(11) { --i: 10; }
+.nx-stagger > *:nth-child(12) { --i: 11; }
+
+/* A skeleton is a MACHINE placeholder: it should look like the surface it is
+   standing in for, with a light travelling across it, not a grey block with a
+   generic `pulse` opacity blink. */
+@keyframes nx-scan {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.nx-skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--nx-radius-sm);
+    background: var(--nx-sunken);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 -1px 0 var(--nx-light);
+}
+
+.nx-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--nx-light) 70%, transparent) 50%,
+        transparent 100%
+    );
+    animation: nx-scan 1.4s var(--nx-ease-press) infinite;
+}
+
+/* the "live" pulse for a running server: a slow breathing dot, not a blink */
+@keyframes nx-breathe {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 55%, transparent);
+    }
+    50% {
+        opacity: 0.82;
+        box-shadow: 0 0 0 4px transparent;
+    }
+}
+
+.nx-breathe {
+    animation: nx-breathe 2.2s var(--nx-ease-press) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nx-enter,
+    .nx-stagger > *,
+    .nx-breathe {
+        animation: none;
+    }
+
+    .nx-skeleton::after {
+        animation: none;
+        background: none;
+    }
+}
+
+/* ----------------------------------------------------------------------------
+   PAGE TRANSITION
+
+   `PageContentBlock` wraps every page in a react-transition-group `CSSTransition`.
+   No `fade-*` rule was ever written, so the classes were applied and did nothing —
+   pages popped in with no transition at all.
+
+   The page uses its own `nx-page` class rather than the shared `fade`: a page is
+   the whole surface being set down, so it rises slightly as it arrives, while the
+   overlays that also use `fade` (dropdowns, modals, toasts) should only cross-fade.
+   Giving a modal the page's rise is the kind of one-size-fits-all motion that reads
+   as generic.
+   ---------------------------------------------------------------------------- */
+.nx-page-appear,
+.nx-page-enter {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.nx-page-appear-active,
+.nx-page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--nx-t-slow) var(--nx-ease-press),
+        transform var(--nx-t-slow) var(--nx-ease-settle);
+}
+
+.nx-page-exit {
+    opacity: 1;
+}
+
+.nx-page-exit-active {
+    opacity: 0;
+    transition: opacity var(--nx-t-fast) linear;
+}
+
+/* the shared overlay transition: a plain cross-fade, no movement */
+.fade-appear,
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-appear-active,
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity var(--nx-t) var(--nx-ease-press);
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity var(--nx-t-fast) linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nx-page-appear,
+    .nx-page-enter,
+    .nx-page-exit,
+    .fade-appear,
+    .fade-enter,
+    .fade-exit {
+        opacity: 1;
+        transform: none;
+    }
+
+    .nx-page-appear-active,
+    .nx-page-enter-active,
+    .nx-page-exit-active,
+    .fade-appear-active,
+    .fade-enter-active,
+    .fade-exit-active {
+        transition: none;
+    }
+}

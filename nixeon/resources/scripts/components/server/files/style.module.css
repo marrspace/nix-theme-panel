@@ -1,0 +1,51 @@
+.manager_actions {
+    @apply grid grid-cols-2 sm:grid-cols-3 w-full gap-4 mb-4;
+
+    & button {
+        @apply w-full first:col-span-2 sm:first:col-span-1;
+    }
+
+    @screen md {
+        @apply flex flex-1 justify-end mb-0;
+
+        & button {
+            @apply w-auto;
+        }
+    }
+}
+
+/* The skeleton rows mirror the real `.file_row` rhythm (px-4 py-2, mb-px) so the
+   list does not jump when the data arrives. */
+.skeleton_row {
+    @apply flex items-center gap-4 px-4 py-2 mb-px;
+}
+
+/* A file row is a shallow raised plate. It stays deliberately thin (this is a dense
+   list, not a card grid) but keeps the same chamfer and edge as everything else so
+   it belongs to the same object family. */
+.file_row {
+    @apply flex items-center cursor-pointer rounded mb-px text-sm no-underline;
+    background: linear-gradient(180deg, var(--nx-raised), var(--nx-raised-2));
+    box-shadow: 0 1px 0 var(--nx-edge), inset 0 1px 0 var(--nx-light);
+    color: var(--nx-ink);
+    transition: background var(--nx-t-fast) linear, box-shadow var(--nx-t-fast) linear;
+
+    &:hover {
+        background: linear-gradient(180deg, var(--nx-raised-2), var(--nx-sunken));
+        box-shadow: 0 1px 0 var(--nx-accent), inset 0 1px 0 var(--nx-light);
+    }
+
+    & > .details {
+        @apply flex flex-1 items-center px-4 py-2 overflow-hidden truncate;
+        color: var(--nx-ink-2);
+        text-decoration: none;
+
+        &:not(a) {
+            @apply cursor-default;
+        }
+    }
+
+    &:hover > .details {
+        color: var(--nx-ink);
+    }
+}
