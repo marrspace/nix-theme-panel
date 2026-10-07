@@ -53,12 +53,58 @@ ART
 # ---------------------------------------------------------------------------
 # where am I, and do I have the payload?
 # ---------------------------------------------------------------------------
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PAYLOAD="$SCRIPT_DIR/nixeon"
+# When run as `bash <(curl …)`, $0 is /dev/fd/63 and there is no repo next to the
+# script. The payload is 6 MB, so it cannot be embedded here; instead the script
+# fetches the tarball itself into a temp dir. This is what makes the documented
+# one-line install actually work — verified by running it that way.
+REPO_SLUG="${NIXEON_REPO:-marrspace/nix-theme-panel}"
+REPO_REF="${NIXEON_REF:-main}"
 
 banner
 
-[[ -d "$PAYLOAD" ]] || die "payload directory not found at $PAYLOAD — run this script from the repository root."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
+PAYLOAD="$SCRIPT_DIR/nixeon"
+WORKDIR=""
+# Set when the payload came from a real checkout next to this script. Used later
+# to decide where the backup goes: /dev/fd is "writable" but is not a real place,
+# so the writability test alone put backups in /dev/fd/backups and lost them.
+LOCAL_REPO=0
+
+if [[ -d "$PAYLOAD" ]]; then
+    LOCAL_REPO=1
+else
+    # not a local checkout — download the payload
+    command -v curl >/dev/null 2>&1 || die "curl is required to fetch the theme. Install curl, or clone the repo and run install.sh locally."
+    command -v tar  >/dev/null 2>&1 || die "tar is required."
+
+    WORKDIR="$(mktemp -d /tmp/nixeon-install.XXXXXX)"
+    step "Downloading the theme"
+    info "from https://github.com/$REPO_SLUG ($REPO_REF)"
+
+    TARBALL="$WORKDIR/theme.tar.gz"
+    if ! curl -fsSL "https://codeload.github.com/$REPO_SLUG/tar.gz/refs/heads/$REPO_REF" -o "$TARBALL"; then
+        rm -rf "$WORKDIR"
+        die "download failed. Check your connection, or clone the repo manually (see README)."
+    fi
+
+    if ! tar -xzf "$TARBALL" -C "$WORKDIR" 2>/dev/null; then
+        rm -rf "$WORKDIR"
+        die "the downloaded archive could not be extracted."
+    fi
+
+    EXTRACTED="$(find "$WORKDIR" -maxdepth 1 -type d -name 'nix-theme-panel-*' | head -1)"
+    if [[ -z "$EXTRACTED" || ! -d "$EXTRACTED/nixeon" ]]; then
+        rm -rf "$WORKDIR"
+        die "the archive did not contain the expected payload directory."
+    fi
+
+    PAYLOAD="$EXTRACTED/nixeon"
+    # keep the download around until the install finishes, then remove it
+    trap '[[ -n "$WORKDIR" && -d "$WORKDIR" ]] && rm -rf "$WORKDIR"' EXIT
+    ok "downloaded ($(du -sh "$PAYLOAD" | cut -f1) payload)"
+fi
+
+[[ -d "$PAYLOAD" ]] || die "payload directory not found — clone the repo and run: sudo bash install.sh"
 [[ -f "$PAYLOAD/resources/scripts/assets/css/tokens.css" ]] || die "payload looks incomplete (tokens.css missing)."
 
 # ---------------------------------------------------------------------------
@@ -135,7 +181,14 @@ fi
 step "Backing up the files that will be replaced"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_DIR="$SCRIPT_DIR/backups"
+# When the script was downloaded (no repo checkout) there is no sensible place
+# next to it — "$SCRIPT_DIR/backups" would resolve to /dev/fd/backups and be lost.
+# Fall back to the home directory, where an admin will actually look for it.
+if [[ "$LOCAL_REPO" -eq 1 && -w "$SCRIPT_DIR" ]]; then
+    BACKUP_DIR="$SCRIPT_DIR/backups"
+else
+    BACKUP_DIR="${HOME:-/root}/nixeon-backups"
+fi
 BACKUP="$BACKUP_DIR/pterodactyl-original-$STAMP.tar.gz"
 mkdir -p "$BACKUP_DIR"
 
