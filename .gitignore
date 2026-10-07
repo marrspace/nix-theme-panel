@@ -1,6 +1,11 @@
 # Backups created by install.sh — these contain a copy of your panel and must
 # never be committed. They are per-install and can be large.
-backups/
+#
+# Anchored to the repo ROOT on purpose: a bare `backups/` matches at every level,
+# which silently excluded resources/scripts/**/server/backups — the upstream
+# Pterodactyl Backup feature (BackupContainer.tsx, CreateBackupButton.tsx, …).
+# Shipping without those would break the Backup page on every install.
+/backups/
 
 # Local build artefacts
 nixeon/node_modules/
